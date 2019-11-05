@@ -1,5 +1,5 @@
 import { IInKeyValueStream, StreamLimiter } from "pareto-api"
-import { ReadOnlyDictionary} from "../classes/volatile/ReadOnlyDictionary"
+import { ReadOnlyDictionary} from "../classes/heap/ReadOnlyDictionary"
 import { UnsafePromise} from "../classes/volatile/UnsafePromise"
 
 

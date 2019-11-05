@@ -8,11 +8,11 @@ import {
 } from "pareto-api"
 import { streamifyArray } from "../../functions/streamifyArray"
 import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { InMemoryReadOnlyDictionary } from "../volatile/InMemoryReadOnlyDictionary"
 import { Stream } from "../volatile/Stream"
 import { error, success, wrap } from "../volatile/UnsafePromise"
+import { BaseDictionary } from "./BaseDictionary"
 
-export class UnsafeInMemoryDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends InMemoryReadOnlyDictionary<StoredData, OpenData> implements
+export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData, OpenData> implements
     IInUnsafeLooseDictionary<CreateData, OpenData, CustomErrorType>,
     IInUnsafeStrictDictionary<CreateData, OpenData, CustomErrorType> {
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>

@@ -9,18 +9,16 @@ import {
 import { streamifyArray } from "../../functions/streamifyArray"
 import { streamifyDictionary } from "../../functions/streamifyDictionary"
 import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { InMemoryReadOnlyDictionary } from "../volatile/InMemoryReadOnlyDictionary"
 import { KeyValueStream } from "../volatile/KeyValueStream"
 import { result, SafePromise } from "../volatile/SafePromise"
 import { Stream } from "../volatile/Stream"
 import { error, success, wrap as wrapUnsafePromise } from "../volatile/UnsafePromise"
+import { BaseDictionary } from "./BaseDictionary"
 
-export class SafeInMemoryDictionary<StoredData, CreateData, OpenData> implements
+export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData, OpenData> implements
     IInSafeStrictDictionary<CreateData, OpenData>,
     IInSafeLooseDictionary<CreateData, OpenData> {
-    private readonly implementation: { [key: string]: StoredData }
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, null>
-    private readonly opener: (storedData: StoredData, entryName: string) => OpenData
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
@@ -30,14 +28,10 @@ export class SafeInMemoryDictionary<StoredData, CreateData, OpenData> implements
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
     ) {
-        this.implementation = dictionary
+        super(dictionary, opener)
         this.creator = creator
-        this.opener = opener
         this.copier = copier
         this.deleter = deleter
-    }
-    public toReadOnlyDictionary() {
-        return new InMemoryReadOnlyDictionary(this.implementation, this.opener)
     }
     public toStream() {
         return new KeyValueStream<StoredData>(
