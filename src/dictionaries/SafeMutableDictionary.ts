@@ -9,16 +9,15 @@ import {
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { result, SafePromise } from "../promises/SafePromise"
 import { error, success, wrap as wrapUnsafePromise } from "../promises/UnsafePromise"
-import { KeyValueStream } from "../streams/KeyValueStream"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
-import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { BaseDictionary } from "./BaseDictionary"
 
-export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData, OpenData> implements
+export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData> implements
     IInSafeStrictDictionary<CreateData, OpenData>,
     IInSafeLooseDictionary<CreateData, OpenData> {
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, null>
+    private readonly opener: (storedData: StoredData, entryName: string) => OpenData
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
@@ -28,8 +27,9 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
     ) {
-        super(dictionary, opener)
+        super(dictionary)
         this.creator = creator
+        this.opener = opener
         this.copier = copier
         this.deleter = deleter
     }
@@ -43,11 +43,6 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
             this.copier,
             this.deleter
         )
-    }
-    public toStream() {
-        return new KeyValueStream<StoredData>(
-            streamifyDictionary(this.implementation)
-        ).mapDataRaw<OpenData>((entry, entryName) => this.opener(entry, entryName))
     }
     public copyEntry(sourceName: string, targetName: string): IUnsafePromise<null, SafeTwoWayError> {
         const source = this.implementation[sourceName]

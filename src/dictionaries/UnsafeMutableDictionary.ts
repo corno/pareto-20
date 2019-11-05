@@ -12,10 +12,11 @@ import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
 
-export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData, OpenData> implements
+export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData> implements
     IInUnsafeLooseDictionary<CreateData, OpenData, CustomErrorType>,
     IInUnsafeStrictDictionary<CreateData, OpenData, CustomErrorType> {
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>
+    private readonly opener: (storedData: StoredData, entryName: string) => OpenData
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
@@ -25,8 +26,9 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
     ) {
-        super(dictionary, opener)
+        super(dictionary)
         this.creator = creator
+        this.opener = opener
         this.copier = copier
         this.deleter = deleter
     }

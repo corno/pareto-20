@@ -14,20 +14,17 @@ import { ILookup } from "./ILookup"
 //     return new ReadOnlyDictionary<Type>(dictionary)
 // }
 
-export class BaseDictionary<StoredData, OpenData> {
+export class BaseDictionary<StoredData> {
     protected readonly implementation: { [key: string]: StoredData }
-    protected readonly opener: (storedData: StoredData, entryName: string) => OpenData
     constructor(
         dictionary: { [key: string]: StoredData },
-        opener: (storedData: StoredData, entryName: string) => OpenData,
     ) {
         this.implementation = dictionary
-        this.opener = opener
     }
-    public toStream() {
+    public toStream<StreamType>(callback: (entry: StoredData, entryName: string) => StreamType) {
         return new KeyValueStream<StoredData>(
             streamifyDictionary(this.implementation)
-        ).mapDataRaw<OpenData>((entry, entryName) => this.opener(entry, entryName))
+        ).mapDataRaw<StreamType>((entry, entryName) => callback(entry, entryName))
     }
     public toKeysStream() {
         return new Stream<string>((_limiter, onData, onEnd) => {
@@ -36,13 +33,13 @@ export class BaseDictionary<StoredData, OpenData> {
             onEnd(false)
         })
     }
-    public forEach(callback: (entry: OpenData, entryName: string) => void) {
-        Object.keys(this.implementation).forEach(entryName => callback(this.opener(this.implementation[entryName], entryName), entryName))
+    // public forEach(callback: (entry: OpenData, entryName: string) => void) {
+    //     Object.keys(this.implementation).forEach(entryName => callback(this.opener(this.implementation[entryName], entryName), entryName))
+    // }
+    public reduceRaw<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => ResultType) {
+        return Object.keys(this.implementation).reduce((previousValue, entryName) => callback(previousValue, this.implementation[entryName], entryName), initialValue)
     }
-    public reduceRaw<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: OpenData, entryName: string) => ResultType) {
-        return Object.keys(this.implementation).reduce((previousValue, entryName) => callback(previousValue, this.opener(this.implementation[entryName], entryName), entryName), initialValue)
-    }
-    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: OpenData, entryName: string) => IInSafePromise<ResultType>) {
+    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => IInSafePromise<ResultType>) {
         return new SafePromise<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue
@@ -50,7 +47,7 @@ export class BaseDictionary<StoredData, OpenData> {
             while (currentIndex !== keys.length) {
                 const currentKey = keys[currentIndex]
                 const currentEntry = this.implementation[currentKey]
-                callback(currentValue, opener(currentEntry), currentKey).handle(result => {
+                callback(currentValue, currentEntry, currentKey).handle(result => {
                     currentValue = result
                 })
                 currentIndex += 1
@@ -58,7 +55,7 @@ export class BaseDictionary<StoredData, OpenData> {
             onResult(currentValue)
         })
     }
-    public toLookup<NewType>(callback: (entry: OpenData, entryName: string) => NewType): ILookup<NewType> {
+    public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
         return {
             getEntry: (entryName: string) => {
                 return new UnsafePromise<NewType, null>((onError, onSuccess) => {
@@ -66,7 +63,7 @@ export class BaseDictionary<StoredData, OpenData> {
                     if (entry === undefined) {
                         onError(null)
                     } else {
-                        onSuccess(callback(this.opener(entry, entryName), entryName))
+                        onSuccess(callback(entry, entryName))
                     }
                 })
             },
