@@ -45,3 +45,7 @@ export class SafePromise<T> implements ISafePromise<T> {
         })
     }
 }
+
+export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): ISafePromise<ResultType> {
+    return new SafePromise(func)
+}

@@ -1,5 +1,5 @@
 export { ISafePromise, IUnsafePromise } from "pareto"
 
-export * from "./SafePromise"
-export * from "./UnsafePromise"
+export { SafeCallerFunction, wrapSafeFunction } from "./SafePromise"
+export { UnsafeCallerFunction, wrapUnsafeFunction } from "./UnsafePromise"
 

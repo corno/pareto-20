@@ -116,3 +116,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
         })
     }
 }
+
+
+export function wrapUnsafeFunction<ResultType, ErrorType>(func: UnsafeCallerFunction<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
+    return new UnsafePromise(func)
+}
