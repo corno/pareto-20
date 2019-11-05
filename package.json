@@ -24,6 +24,7 @@
     "dist/*"
   ],
   "dependencies": {
-    "pareto": "^0.26.0"
+    "pareto-api": "^0.11.0",
+    "pareto-20": "^0.0.2"
   }
 }

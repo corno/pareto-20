@@ -1,9 +1,9 @@
-import { IInSafePromise, IInUnsafePromise, ISafePromise, IUnsafePromise } from "pareto"
+import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import { ISafePromise, SafeCallerFunction } from "../../interfaces/ISafePromise"
+import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
 import { UnsafePromise } from "./UnsafePromise"
 
-export type SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => void
-
-export class SafePromise<T> implements ISafePromise<T> {
+export class SafePromise<T> implements IInSafePromise<T> {
     private readonly callerFunction: SafeCallerFunction<T>
     private isCalled = false
     constructor(callerFunction: SafeCallerFunction<T>) {
@@ -20,7 +20,7 @@ export class SafePromise<T> implements ISafePromise<T> {
         this.isCalled = true
         this.callerFunction(onResult)
     }
-    public mapResultRaw<NewType>(onResult: (result: T) => NewType): ISafePromise<NewType> {
+    public mapResultRaw<NewType>(onResult: (result: T) => NewType): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
             this.handle(res => {
                 newOnResult(onResult(res))
@@ -28,7 +28,7 @@ export class SafePromise<T> implements ISafePromise<T> {
 
         })
     }
-    public mapResult<NewType>(onResult: (result: T) => IInSafePromise<NewType>): ISafePromise<NewType> {
+    public mapResult<NewType>(onResult: (result: T) => SafePromise<NewType>): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
             this.handle(res => {
                 onResult(res).handle(newOnResult)
@@ -48,4 +48,12 @@ export class SafePromise<T> implements ISafePromise<T> {
 
 export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): ISafePromise<ResultType> {
     return new SafePromise(func)
+}
+
+//If a Safe Promise is required, but the result is already known
+export const result = <ResultType>(res: ResultType): SafePromise<ResultType> => {
+    const handler: SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => {
+        onResult(res)
+    }
+    return new SafePromise<ResultType>(handler)
 }

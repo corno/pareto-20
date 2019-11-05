@@ -1,18 +1,6 @@
-import { ISafeOpenedResource, IUnsafeOnOpenResource } from "pareto"
+import { IUnsafeOnOpenResource } from "../../interfaces/IUnsafeOnOpenResource"
+import { SafeOpenedResource } from "./SafeOpenedResource"
 
-export class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<ResourceType> {
-    public readonly resource: ResourceType
-    private readonly closer: () => void
-    constructor(resource: ResourceType, closer: () => void) {
-        this.resource = resource
-        this.closer = closer
-    }
-    public close() {
-        this.closer()
-    }
-}
-
-// tslint:disable-next-line: max-classes-per-file
 export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenResource<ResourceType, OpenError> {
     private readonly openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
     constructor(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
