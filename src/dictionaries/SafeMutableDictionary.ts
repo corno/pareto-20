@@ -33,6 +33,17 @@ export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends Bas
         this.copier = copier
         this.deleter = deleter
     }
+    public derive<NewOpenData>(
+        opener: (storedData: StoredData, entryName: string) => NewOpenData,
+    ) {
+        return new SafeMutableDictionary<StoredData, CreateData, NewOpenData>(
+            this.implementation,
+            this.creator,
+            opener,
+            this.copier,
+            this.deleter
+        )
+    }
     public toStream() {
         return new KeyValueStream<StoredData>(
             streamifyDictionary(this.implementation)
