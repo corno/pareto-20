@@ -1,4 +1,5 @@
 import {
+    IInSafeLookup,
     IInSafePromise,
 } from "pareto-api"
 import { SafePromise } from "../promises/SafePromise"
@@ -7,6 +8,7 @@ import { KeyValueStream } from "../streams/KeyValueStream"
 import { Stream } from "../streams/Stream"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { ILookup } from "./ILookup"
+import { ReadOnlyDictionary } from "./ReadOnlyDictionary"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
@@ -68,6 +70,36 @@ export class BaseDictionary<StoredData> {
                 })
             },
         }
+    }
+    public match<SupportType, TargetType, NewErrorType>(
+        lookup: IInSafeLookup<SupportType>,
+        resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
+        missingEntriesErrorCreator: (errors: ReadOnlyDictionary<StoredData>) => NewErrorType
+    ) {
+        return new UnsafePromise<ReadOnlyDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
+            const resultDictionary: { [key: string]: TargetType } = {}
+            const errorDictionary: { [key: string]: StoredData } = {}
+            let hasErrors = false
+            //FIX make this work asynchronously
+            const keys = Object.keys(this.implementation)
+            keys.forEach(key => {
+                const entry = this.implementation[key]
+                lookup.getEntry(key).handle(
+                    _err => {
+                        hasErrors = true
+                        errorDictionary[key] = entry
+                    },
+                    supportEntry => {
+                        resultDictionary[key] = resultCreator(entry, supportEntry, key)
+                    }
+                )
+            })
+            if (hasErrors) {
+                onError(missingEntriesErrorCreator(new ReadOnlyDictionary(errorDictionary)))
+            } else {
+                onSuccess(new ReadOnlyDictionary(resultDictionary))
+            }
+        })
     }
     // public map_x<NewType>(callback: (entry: OpenData, entryName: string) => NewType) {
     //     const keys = Object.keys(this.implementation)
