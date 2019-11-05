@@ -10,7 +10,7 @@ export interface IKeyValueStream<DataType> extends IInKeyValueStream<DataType> {
     mapDataRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType>
     filterRaw<NewDataType>(onData: (data: DataType, key: string) => [false] | [true, NewDataType]): IKeyValueStream<NewDataType>
     toKeysStream(): IStream<string>
-    merge<TargetType, IntermediateErrorType, TargetErrorType>(
+    tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: StreamLimiter,
         promisify: (entry: DataType, entryName: string) => IInUnsafePromise<TargetType, IntermediateErrorType>,
         errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>

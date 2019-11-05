@@ -44,7 +44,7 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
             )
         })
     }
-    public merge<TargetType, IntermediateErrorType, TargetErrorType>(
+    public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: StreamLimiter,
         promisify: (entry: DataType, entryName: string) => IInUnsafePromise<TargetType, IntermediateErrorType>,
         errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>
