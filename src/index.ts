@@ -1,4 +1,7 @@
 
+export * from "./genericFunctions"
+
+export * from "./functions/buildStream"
 export * from "./functions/convertStreamIntoDictionary"
 export * from "./functions/mergeArrayOfUnsafePromises"
 export * from "./functions/mergeStreamOfUnsafePromises"
@@ -11,6 +14,7 @@ export * from "./interfaces/ISafeOpenedResource"
 export * from "./interfaces/ISafePromise"
 export * from "./interfaces/ISafeResource"
 export * from "./interfaces/IStream"
+export * from "./interfaces/IStreamBuilder"
 export * from "./interfaces/IUnsafeOnCloseResource"
 export * from "./interfaces/IUnsafeOnOpenResource"
 export * from "./interfaces/ISafeOpenedResource"
