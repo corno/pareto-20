@@ -1,7 +1,5 @@
 
 export * from "./genericFunctions"
-export * from "./functions/convertStreamIntoDictionary"
-export * from "./functions/mergeArrayOfUnsafePromises"
 
 export * from "./dictionaries/BaseDictionary"
 export * from "./dictionaries/BuildableLookup"
@@ -42,6 +40,5 @@ export * from "./streams/buildStream"
 export * from "./streams/mergeStreamOfUnsafePromises"
 export * from "./streams/streamifyArray"
 export * from "./streams/streamifyDictionary"
-
 
 export { wrap } from "./wrap"
