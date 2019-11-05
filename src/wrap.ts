@@ -1,5 +1,7 @@
 import { IInKeyValueStream, IInSafePromise, IInSafeResource, IInStream, IInUnsafeOnCloseResource, IInUnsafeOnOpenResource, IInUnsafePromise, IInUnsafeResource } from "pareto-api"
 
+import { assertUnreachable } from "./genericFunctions"
+
 import { ISafePromise } from "./promises/ISafePromise"
 import { IUnsafePromise } from "./promises/IUnsafePromise"
 import { SafePromise } from "./promises/SafePromise"
@@ -20,8 +22,38 @@ import { UnsafeOnCloseResource } from "./resources/UnsafeOnCloseResource"
 import { UnsafeOnOpenResource } from "./resources/UnsafeOnOpenResource"
 import { UnsafeResource } from "./resources/UnsafeResource"
 
+export type OnKeyConflict =
+    ["ignore"]
+    |
+    ["abort"]
+
 export const wrap = {
-    KeyValueStream: <DataType>(stream: IInKeyValueStream<DataType>): IKeyValueStream<DataType> => {
+    KeyValueStream: <DataType>(stream: IInKeyValueStream<DataType>, onKeyConflict: OnKeyConflict): IKeyValueStream<DataType> => {
+        switch (onKeyConflict[0]) {
+            case "abort": {
+                const keys: { [key: string]: null } = {}
+                return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
+                    stream.process(
+                        limiter,
+                        (data, abort) => {
+                            if (keys[data.key] !== undefined) {
+                                throw new Error("keyconflict: " + data.key)
+                            }
+                            onData(data, abort)
+                        },
+                        onEnd
+                    )
+                })
+            }
+            case "ignore": {
+                return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
+                    stream.process(limiter, onData, onEnd)
+                })
+            }
+            default:
+                assertUnreachable(onKeyConflict[0])
+                throw new Error("UNREACHABLE")
+        }
         return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
             stream.process(limiter, onData, onEnd)
         })
