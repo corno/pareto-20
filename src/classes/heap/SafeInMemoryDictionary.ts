@@ -9,12 +9,11 @@ import {
 import { streamifyArray } from "../../functions/streamifyArray"
 import { streamifyDictionary } from "../../functions/streamifyDictionary"
 import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { result } from "../volatile/SafePromise"
-import { error, success, wrap as wrapUnsafePromise } from "../volatile/UnsafePromise"
 import { InMemoryReadOnlyDictionary } from "../volatile/InMemoryReadOnlyDictionary"
 import { KeyValueStream } from "../volatile/KeyValueStream"
-import { SafePromise } from "../volatile/SafePromise"
+import { result, SafePromise } from "../volatile/SafePromise"
 import { Stream } from "../volatile/Stream"
+import { error, success, wrap as wrapUnsafePromise } from "../volatile/UnsafePromise"
 
 export class SafeInMemoryDictionary<StoredData, CreateData, OpenData> implements
     IInSafeStrictDictionary<CreateData, OpenData>,

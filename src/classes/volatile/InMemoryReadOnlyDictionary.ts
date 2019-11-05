@@ -2,8 +2,8 @@ import {
     IInSafePromise,
     IInUnsafePromise,
 } from "pareto-api"
-import { mergeArrayOfUnsafePromises } from "../../functions/mergeArrayOfUnsafePromises"
 import { mergeArrayOfSafePromises } from "../../functions/mergeArrayOfSafePromises"
+import { mergeArrayOfUnsafePromises } from "../../functions/mergeArrayOfUnsafePromises"
 import { streamifyDictionary } from "../../functions/streamifyDictionary"
 import { ILookup } from "../../interfaces/ILookup"
 import { KeyValueStream } from "./KeyValueStream"
