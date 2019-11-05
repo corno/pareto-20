@@ -12,22 +12,34 @@ import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
 
-export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData, OpenData> implements
+export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData, OpenData> implements
     IInUnsafeLooseDictionary<CreateData, OpenData, CustomErrorType>,
     IInUnsafeStrictDictionary<CreateData, OpenData, CustomErrorType> {
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
+        dictionary: { [key: string]: StoredData },
         creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
     ) {
-        super({}, opener)
+        super(dictionary, opener)
         this.creator = creator
         this.copier = copier
         this.deleter = deleter
+    }
+    public derive<NewOpenData>(
+        opener: (storedData: StoredData, entryName: string) => NewOpenData,
+    ) {
+        return new IntUnsafeMutableDictionary<StoredData, CreateData, NewOpenData, CustomErrorType>(
+            this.implementation,
+            this.creator,
+            opener,
+            this.copier,
+            this.deleter
+        )
     }
     public getEntry(entryName: string): IUnsafePromise<OpenData, UnsafeEntryDoesNotExistError<CustomErrorType>> {
         const entry = this.implementation[entryName]
@@ -82,5 +94,17 @@ export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErr
         this.implementation[newName] = entry
         delete this.implementation[oldName]
         return success(null)
+    }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> {
+    constructor(
+        creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>,
+        opener: (storedData: StoredData, entryName: string) => OpenData,
+        copier: (storedData: StoredData) => StoredData,
+        deleter: (storedData: StoredData) => void
+    ) {
+        super({}, creator, opener, copier, deleter)
     }
 }

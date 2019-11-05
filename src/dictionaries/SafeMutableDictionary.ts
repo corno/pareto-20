@@ -15,7 +15,7 @@ import { streamifyArray } from "../streams/streamifyArray"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { BaseDictionary } from "./BaseDictionary"
 
-export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData, OpenData> implements
+export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData, OpenData> implements
     IInSafeStrictDictionary<CreateData, OpenData>,
     IInSafeLooseDictionary<CreateData, OpenData> {
     private readonly creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, null>
@@ -36,7 +36,7 @@ export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends Bas
     public derive<NewOpenData>(
         opener: (storedData: StoredData, entryName: string) => NewOpenData,
     ) {
-        return new SafeMutableDictionary<StoredData, CreateData, NewOpenData>(
+        return new IntSafeMutableDictionary<StoredData, CreateData, NewOpenData>(
             this.implementation,
             this.creator,
             opener,
@@ -100,5 +100,17 @@ export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends Bas
         this.implementation[newName] = entry
         delete this.implementation[oldName]
         return success(null)
+    }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends IntSafeMutableDictionary<StoredData, CreateData, OpenData> {
+    constructor(
+        creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, null>,
+        opener: (storedData: StoredData, entryName: string) => OpenData,
+        copier: (storedData: StoredData) => StoredData,
+        deleter: (storedData: StoredData) => void
+    ) {
+        super({}, creator, opener, copier, deleter)
     }
 }
