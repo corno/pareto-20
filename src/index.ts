@@ -30,7 +30,10 @@ export * from "./classes/builders/EmptyStream"
 export * from "./classes/builders/StaticLookup"
 export * from "./classes/builders/StaticStream"
 
+export * from "./classes/heap/BaseDictionary"
+export * from "./classes/heap/ReadOnlyDictionary"
 export * from "./classes/heap/SafeMutableDictionary"
+export * from "./classes/heap/UnsafeMutableDictionary"
 
 export * from "./classes/resources/SafeOpenedResource"
 export * from "./classes/resources/SafeResource"
