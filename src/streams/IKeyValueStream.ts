@@ -1,7 +1,7 @@
 import { IInKeyValueStream, IInSafePromise, IInUnsafePromise, StreamLimiter } from "pareto-api"
-import { ISafePromise } from "./ISafePromise"
+import { ISafePromise } from "../promises/ISafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { IStream } from "./IStream"
-import { IUnsafePromise } from "./IUnsafePromise"
 
 
 // tslint:disable-next-line: max-classes-per-file

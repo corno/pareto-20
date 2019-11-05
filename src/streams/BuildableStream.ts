@@ -1,6 +1,6 @@
-import { streamifyArray } from "../../functions/streamifyArray"
-import { IStreamBuilder } from "../../interfaces/IStreamBuilder"
-import { Stream } from "../volatile/Stream"
+import { IStreamBuilder } from "./IStreamBuilder"
+import { Stream } from "./Stream"
+import { streamifyArray } from "./streamifyArray"
 
 export class BuildableStream<DataType> extends Stream<DataType> implements IStreamBuilder<DataType> {
     private readonly array: DataType[]

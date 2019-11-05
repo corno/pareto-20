@@ -1,6 +1,6 @@
 import { IInKeyValueStream, StreamLimiter } from "pareto-api"
-import { ReadOnlyDictionary} from "../classes/heap/ReadOnlyDictionary"
-import { UnsafePromise} from "../classes/volatile/UnsafePromise"
+import { ReadOnlyDictionary} from "../dictionaries/ReadOnlyDictionary"
+import { UnsafePromise} from "../promises/UnsafePromise"
 
 
 export function convertStreamIntoDictionary<DataType, ErrorType>(

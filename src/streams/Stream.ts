@@ -1,7 +1,7 @@
 import { IInSafePromise, StreamLimiter } from "pareto-api"
-import { ISafePromise } from "../../interfaces/ISafePromise"
-import { FilterResult, IStream, StreamGetter } from "../../interfaces/IStream"
-import { SafePromise } from "./SafePromise"
+import { ISafePromise } from "../promises/ISafePromise"
+import { SafePromise } from "../promises/SafePromise"
+import { FilterResult, IStream, StreamGetter } from "./IStream"
 
 export class Stream<DataType> implements IStream<DataType> {
     public readonly process: StreamGetter<DataType>

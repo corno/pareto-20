@@ -1,5 +1,5 @@
-import { streamifyDictionary } from "../../functions/streamifyDictionary"
-import { KeyValueStream } from "../volatile/KeyValueStream"
+import { KeyValueStream } from "./KeyValueStream"
+import { streamifyDictionary } from "./streamifyDictionary"
 
 export class BuildableKeyValueStream<DataType> extends KeyValueStream<DataType> {
     private readonly dictionary: { [key: string]: DataType }

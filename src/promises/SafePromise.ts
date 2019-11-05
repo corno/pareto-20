@@ -1,6 +1,6 @@
 import { IInSafePromise, IInUnsafePromise } from "pareto-api"
-import { ISafePromise, SafeCallerFunction } from "../../interfaces/ISafePromise"
-import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
+import { ISafePromise, SafeCallerFunction } from "./ISafePromise"
+import { IUnsafePromise } from "./IUnsafePromise"
 import { UnsafePromise } from "./UnsafePromise"
 
 export class SafePromise<T> implements IInSafePromise<T> {

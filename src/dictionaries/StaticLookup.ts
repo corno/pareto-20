@@ -1,7 +1,7 @@
 
-import { error, success } from "../../index"
-import { ILookup } from "../../interfaces/ILookup"
-import { IUnsafePromise} from "../../interfaces/IUnsafePromise"
+import { IUnsafePromise} from "../promises/IUnsafePromise"
+import { error, success } from "../promises/UnsafePromise"
+import { ILookup } from "./ILookup"
 
 
 export class StaticLookup<DataType> implements ILookup<DataType> {

@@ -6,10 +6,10 @@ import {
     UnsafeEntryDoesNotExistError,
     UnsafeTwoWayError,
 } from "pareto-api"
-import { streamifyArray } from "../../functions/streamifyArray"
-import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { Stream } from "../volatile/Stream"
-import { error, success, wrap } from "../volatile/UnsafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
+import { error, success, wrap } from "../promises/UnsafePromise"
+import { Stream } from "../streams/Stream"
+import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
 
 export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData, OpenData> implements

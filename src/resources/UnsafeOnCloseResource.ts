@@ -1,4 +1,4 @@
-import { IUnsafeOnCloseResource } from "../../interfaces/IUnsafeOnCloseResource"
+import { IUnsafeOnCloseResource } from "./IUnsafeOnCloseResource"
 import { UnsafeOnCloseFunction, UnsafeOpenedResource } from "./UnsafeOpenedResource"
 
 export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseResource<ResourceType, CloseError> {

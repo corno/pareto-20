@@ -1,12 +1,12 @@
 import {
     IInSafePromise,
 } from "pareto-api"
-import { streamifyDictionary } from "../../functions/streamifyDictionary"
-import { ILookup } from "../../interfaces/ILookup"
-import { KeyValueStream } from "../volatile/KeyValueStream"
-import { SafePromise } from "../volatile/SafePromise"
-import { Stream } from "../volatile/Stream"
-import { UnsafePromise } from "../volatile/UnsafePromise"
+import { SafePromise } from "../promises/SafePromise"
+import { UnsafePromise } from "../promises/UnsafePromise"
+import { KeyValueStream } from "../streams/KeyValueStream"
+import { Stream } from "../streams/Stream"
+import { streamifyDictionary } from "../streams/streamifyDictionary"
+import { ILookup } from "./ILookup"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}

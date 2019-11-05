@@ -1,6 +1,6 @@
 
-import { UnsafePromise} from "./classes/volatile/UnsafePromise"
-import { IUnsafePromise} from "./interfaces/IUnsafePromise"
+import { IUnsafePromise} from "./promises/IUnsafePromise"
+import { UnsafePromise} from "./promises/UnsafePromise"
 
 export function assertNotNull<InputType, ResultType, ErrorType>(
     value: null | InputType,

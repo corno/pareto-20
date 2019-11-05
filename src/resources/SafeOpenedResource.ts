@@ -1,4 +1,4 @@
-import { ISafeOpenedResource } from "../../interfaces/ISafeOpenedResource"
+import { ISafeOpenedResource } from "./ISafeOpenedResource"
 
 export class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<ResourceType> {
     public readonly resource: ResourceType

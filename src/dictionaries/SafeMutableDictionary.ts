@@ -6,13 +6,13 @@ import {
     SafeEntryDoesNotExistError,
     SafeTwoWayError,
 } from "pareto-api"
-import { streamifyArray } from "../../functions/streamifyArray"
-import { streamifyDictionary } from "../../functions/streamifyDictionary"
-import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { KeyValueStream } from "../volatile/KeyValueStream"
-import { result, SafePromise } from "../volatile/SafePromise"
-import { Stream } from "../volatile/Stream"
-import { error, success, wrap as wrapUnsafePromise } from "../volatile/UnsafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
+import { result, SafePromise } from "../promises/SafePromise"
+import { error, success, wrap as wrapUnsafePromise } from "../promises/UnsafePromise"
+import { KeyValueStream } from "../streams/KeyValueStream"
+import { Stream } from "../streams/Stream"
+import { streamifyArray } from "../streams/streamifyArray"
+import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { BaseDictionary } from "./BaseDictionary"
 
 export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData, OpenData> implements

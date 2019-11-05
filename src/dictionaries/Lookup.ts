@@ -1,5 +1,5 @@
-import { ILookup } from "../interfaces/ILookup"
-import { UnsafePromise } from "./volatile/UnsafePromise"
+import { UnsafePromise } from "../promises/UnsafePromise"
+import { ILookup } from "./ILookup"
 
 /**
  * @deprecated

@@ -1,5 +1,5 @@
 import { IInSafePromise, IInStream, StreamLimiter } from "pareto-api"
-import { ISafePromise } from "./ISafePromise"
+import { ISafePromise } from "../promises/ISafePromise"
 
 export type FilterResult<DataType> = [false] | [true, DataType]
 

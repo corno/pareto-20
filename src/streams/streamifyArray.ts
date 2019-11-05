@@ -1,5 +1,5 @@
 
-import { StreamGetter } from "../interfaces/IStream"
+import { StreamGetter } from "./IStream"
 
 export function streamifyArray<ElementType>(array: ElementType[]): StreamGetter<ElementType> {
     return (limiter, onData, onEnd) => {

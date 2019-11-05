@@ -1,5 +1,5 @@
-import { streamifyArray } from "../functions/streamifyArray"
-import { Stream } from "./volatile/Stream"
+import { Stream } from "../streams/Stream"
+import { streamifyArray } from "../streams/streamifyArray"
 
 export class NumberDictionary<DataType> extends Stream<DataType> {
     private readonly array: DataType[]

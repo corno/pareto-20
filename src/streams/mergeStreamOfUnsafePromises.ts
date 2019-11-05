@@ -1,9 +1,9 @@
 import { IInStream, IInUnsafePromise, StreamLimiter } from "pareto-api"
-import { StaticStream } from "../classes/builders/StaticStream"
-import { Stream } from "../classes/volatile/Stream"
-import { UnsafePromise } from "../classes/volatile/UnsafePromise"
-import { IStream } from "../interfaces/IStream"
-import { IUnsafePromise } from "../interfaces/IUnsafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
+import { UnsafePromise } from "../promises/UnsafePromise"
+import { IStream } from "./IStream"
+import { StaticStream } from "./StaticStream"
+import { Stream } from "./Stream"
 
 export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateErrorType, ErrorType>(
     stream: IInStream<DataType>,

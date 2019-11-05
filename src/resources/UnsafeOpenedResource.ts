@@ -1,4 +1,4 @@
-import { IUnsafeOpenedResource } from "../../interfaces/IUnsafeOpenedResource"
+import { IUnsafeOpenedResource } from "./IUnsafeOpenedResource"
 
 export class UnsafeOpenedResource<ResourceType, CloseError> implements IUnsafeOpenedResource<ResourceType, CloseError> {
     public readonly resource: ResourceType

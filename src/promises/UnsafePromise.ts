@@ -1,5 +1,5 @@
 import { IInSafePromise, IInUnsafePromise } from "pareto-api"
-import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
+import { IUnsafePromise } from "./IUnsafePromise"
 
 export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<ResultType, ErrorType> {
     private isCalled: boolean

@@ -1,26 +1,24 @@
 import { IInKeyValueStream, IInSafePromise, IInSafeResource, IInStream, IInUnsafeOnCloseResource, IInUnsafeOnOpenResource, IInUnsafePromise, IInUnsafeResource } from "pareto-api"
 
-import { SafeResource } from "./classes/resources/SafeResource"
-import { UnsafeOnCloseResource } from "./classes/resources/UnsafeOnCloseResource"
-import { UnsafeOnOpenResource } from "./classes/resources/UnsafeOnOpenResource"
-import { UnsafeResource } from "./classes/resources/UnsafeResource"
+import { ISafePromise } from "./promises/ISafePromise"
+import { IUnsafePromise } from "./promises/IUnsafePromise"
+import { SafePromise } from "./promises/SafePromise"
+import { UnsafePromise } from "./promises/UnsafePromise"
 
-import { KeyValueStream } from "./classes/volatile/KeyValueStream"
-import { Stream } from "./classes/volatile/Stream"
+import { IKeyValueStream } from "./streams/IKeyValueStream"
+import { IStream } from "./streams/IStream"
+import { KeyValueStream } from "./streams/KeyValueStream"
+import { Stream } from "./streams/Stream"
 
-import { SafePromise } from "./classes/volatile/SafePromise"
-import { UnsafePromise } from "./classes/volatile/UnsafePromise"
 
-import { ISafePromise } from "./interfaces/ISafePromise"
-import { IUnsafePromise } from "./interfaces/IUnsafePromise"
-
-import { IKeyValueStream } from "./interfaces/IKeyValueStream"
-import { IStream } from "./interfaces/IStream"
-
-import { ISafeResource } from "./interfaces/ISafeResource"
-import { IUnsafeOnCloseResource } from "./interfaces/IUnsafeOnCloseResource"
-import { IUnsafeOnOpenResource } from "./interfaces/IUnsafeOnOpenResource"
-import { IUnsafeResource } from "./interfaces/IUnsafeResource"
+import { ISafeResource } from "./resources/ISafeResource"
+import { IUnsafeOnCloseResource } from "./resources/IUnsafeOnCloseResource"
+import { IUnsafeOnOpenResource } from "./resources/IUnsafeOnOpenResource"
+import { IUnsafeResource } from "./resources/IUnsafeResource"
+import { SafeResource } from "./resources/SafeResource"
+import { UnsafeOnCloseResource } from "./resources/UnsafeOnCloseResource"
+import { UnsafeOnOpenResource } from "./resources/UnsafeOnOpenResource"
+import { UnsafeResource } from "./resources/UnsafeResource"
 
 export const wrap = {
     KeyValueStream: <DataType>(stream: IInKeyValueStream<DataType>): IKeyValueStream<DataType> => {

@@ -1,4 +1,4 @@
-import { IUnsafeOnOpenResource } from "../../interfaces/IUnsafeOnOpenResource"
+import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { SafeOpenedResource } from "./SafeOpenedResource"
 
 export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenResource<ResourceType, OpenError> {

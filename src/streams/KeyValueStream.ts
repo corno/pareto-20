@@ -1,11 +1,11 @@
 import { IInSafePromise, IInUnsafePromise, KeyValuePair, StreamLimiter } from "pareto-api"
-import { streamifyDictionary } from "../../functions/streamifyDictionary"
-import { IKeyValueStream } from "../../interfaces/IKeyValueStream"
-import { ISafePromise } from "../../interfaces/ISafePromise"
-import { IUnsafePromise } from "../../interfaces/IUnsafePromise"
-import { SafePromise } from "./SafePromise"
+import { ISafePromise } from "../promises/ISafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
+import { SafePromise } from "../promises/SafePromise"
+import { UnsafePromise } from "../promises/UnsafePromise"
+import { IKeyValueStream } from "./IKeyValueStream"
 import { Stream } from "./Stream"
-import { UnsafePromise } from "./UnsafePromise"
+import { streamifyDictionary } from "./streamifyDictionary"
 
 type OnData<DataType> = (data: KeyValuePair<DataType>, abort: () => void) => void
 

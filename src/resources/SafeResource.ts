@@ -1,4 +1,4 @@
-import { ISafeResource } from "../../interfaces/ISafeResource"
+import { ISafeResource } from "./ISafeResource"
 import { SafeFunction, SafeOpenedResource } from "./SafeOpenedResource"
 
 export class SafeResource<ResourceType> implements ISafeResource<ResourceType> {
