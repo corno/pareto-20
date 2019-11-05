@@ -19,13 +19,12 @@ export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErr
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
-        dictionary: { [key: string]: StoredData },
         creator: (createData: CreateData, entryName: string) => IInUnsafePromise<StoredData, CustomErrorType>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
     ) {
-        super(dictionary, opener)
+        super({}, opener)
         this.creator = creator
         this.copier = copier
         this.deleter = deleter
