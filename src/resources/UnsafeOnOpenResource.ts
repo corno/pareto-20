@@ -1,3 +1,4 @@
+import { IInSafePromise } from "pareto-api"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { SafeOpenedResource } from "./SafeOpenedResource"
 
@@ -6,7 +7,7 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
     constructor(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
         this.openFunction = openFunction
     }
-    public open(onError: (openError: OpenError) => void, onOpened: (openedResource: SafeOpenedResource<ResourceType>) => void) {
+    public openUnsafeOpenableResource(onError: (openError: OpenError) => void, onOpened: (openedResource: SafeOpenedResource<ResourceType>) => void) {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: () => void) => {
@@ -14,19 +15,19 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
             }
         )
     }
-    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => NewErrorType) {
+    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => IInSafePromise<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {
             this.openFunction(
-                error => onOpenError(errorConverter(error)),
+                error => errorConverter(error).handleSafePromise(res => onOpenError(res)),
                 (resource, closer) => onSuccess(resource, closer)
             )
         })
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => NewType) {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => IInSafePromise<NewType>): IUnsafeOnOpenResource<NewType, OpenError> {
         return new UnsafeOnOpenResource<NewType, OpenError>((onOpenError, onSuccess) => {
             this.openFunction(
                 error => onOpenError(error),
-                (resource, closer) => onSuccess(resourceConverter(resource), closer)
+                (resource, closer) => resourceConverter(resource).handleSafePromise(res => onSuccess(res, closer))
             )
         })
     }

@@ -33,7 +33,7 @@ export const wrap = {
             case "abort": {
                 const keys: { [key: string]: null } = {}
                 return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
-                    stream.process(
+                    stream.processStream(
                         limiter,
                         (data, abort) => {
                             if (keys[data.key] !== undefined) {
@@ -47,58 +47,55 @@ export const wrap = {
             }
             case "ignore": {
                 return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
-                    stream.process(limiter, onData, onEnd)
+                    stream.processStream(limiter, onData, onEnd)
                 })
             }
             default:
                 assertUnreachable(onKeyConflict[0])
                 throw new Error("UNREACHABLE")
         }
-        return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
-            stream.process(limiter, onData, onEnd)
-        })
     },
     SafePromise: <SourceResultType>(promise: IInSafePromise<SourceResultType>): ISafePromise<SourceResultType> => {
         return new SafePromise<SourceResultType>(onResult => {
-            promise.handle(onResult)
+            promise.handleSafePromise(onResult)
         })
     },
     UnsafePromise: <SourceResultType, SourceErrorType>(promise: IInUnsafePromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
         return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {
-            promise.handle(onError, onSucces)
+            promise.handleUnsafePromise(onError, onSucces)
         })
     },
     SafeResource: <T>(safeResource: IInSafeResource<T>): ISafeResource<T> => {
         return new SafeResource<T>(onOpened => {
-            safeResource.open(openedResource => {
-                onOpened(openedResource.resource, openedResource.close)
+            safeResource.openSafeOpenableResource(openedResource => {
+                onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
             })
         })
     },
     UnsafeResource: <T, OpenError, CloseError>(unsafeResource: IInUnsafeResource<T, OpenError, CloseError>): IUnsafeResource<T, OpenError, CloseError> => {
         return new UnsafeResource<T, OpenError, CloseError>((onError, onOpened) => {
-            unsafeResource.open(onError, openedResource => {
-                onOpened(openedResource.resource, openedResource.close)
+            unsafeResource.openUnsafeOpenableResource(onError, openedResource => {
+                onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
             })
         })
     },
     UnsafeOnOpenResource: <T, OpenError>(unsafeOnOpenResource: IInUnsafeOnOpenResource<T, OpenError>): IUnsafeOnOpenResource<T, OpenError> => {
         return new UnsafeOnOpenResource<T, OpenError>((onError, onOpened) => {
-            unsafeOnOpenResource.open(onError, openedResource => {
-                onOpened(openedResource.resource, openedResource.close)
+            unsafeOnOpenResource.openUnsafeOpenableResource(onError, openedResource => {
+                onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
             })
         })
     },
     UnsafeOnCloseResource: <T, CloseError>(unsafeOnCloseResource: IInUnsafeOnCloseResource<T, CloseError>): IUnsafeOnCloseResource<T, CloseError> => {
         return new UnsafeOnCloseResource<T, CloseError>(onOpened => {
-            unsafeOnCloseResource.open(openedResource => {
-                onOpened(openedResource.resource, openedResource.close)
+            unsafeOnCloseResource.openSafeOpenableResource(openedResource => {
+                onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
             })
         })
     },
     Stream: <DataType>(stream: IInStream<DataType>): IStream<DataType> => {
         return new Stream<DataType>((limiter, onData, onEnd) => {
-            stream.process(limiter, onData, onEnd)
+            stream.processStream(limiter, onData, onEnd)
         })
     },
 }

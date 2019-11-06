@@ -13,34 +13,66 @@ export type KeyValueStreamGetter<DataType> = (limiter: StreamLimiter, onData: On
 
 // tslint:disable-next-line: max-classes-per-file
 export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
-    public readonly process: (limiter: StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+    public readonly processStream: (limiter: StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
     constructor(
         streamGetter: KeyValueStreamGetter<DataType>,
     ) {
-        this.process = streamGetter
+        this.processStream = streamGetter
+    }
+    public toKeysStream() {
+        return new Stream<string>((limiter, onData, onEnd) => {
+            this.processStream(limiter, (data, abort) => onData(data.key, abort), onEnd)
+        })
+    }
+
+
+    public map<NewDataType>(onData: (data: DataType, key: string) => IInSafePromise<NewDataType>): IKeyValueStream<NewDataType> {
+        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+            this.processStream(
+                newLimiter,
+                (data, abort) => onData(data.value, data.key).handleSafePromise(result => newOnData({ key: data.key, value: result }, abort)),
+                aborted => newOnEnd(aborted)
+            )
+        })
+    }
+    public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType> {
+        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+            this.processStream(
+                newLimiter,
+                (data, abort) => newOnData({ key: data.key, value: onData(data.value, data.key) }, abort),
+                aborted => newOnEnd(aborted)
+            )
+        })
+    }
+    public filter<NewDataType>(
+        onData: (data: DataType, key: string) => [false] | [true, IInSafePromise<NewDataType>],
+    ): KeyValueStream<NewDataType> {
+        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+            this.processStream(
+                newLimiter,
+                (data, abort) => {
+                    const filterResult = onData(data.value, data.key)
+                    if (filterResult[0]) {
+                        filterResult[1].handleSafePromise(result => newOnData({ key: data.key, value: result }, abort))
+                    }
+                },
+                aborted => newOnEnd(aborted)
+            )
+        })
     }
     public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType, key: string) => IInSafePromise<ResultType>): ISafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             let currentValue = initialValue
-            this.process(
+            this.processStream(
                 null, //no limiter
                 (data, _abort) => {
-                    onData(currentValue, data.value, data.key).handle(result => {
+                    onData(currentValue, data.value, data.key).handleSafePromise(result => {
                         currentValue = result
                     })
                 },
                 _aborted => {
                     onResult(currentValue)
                 }
-            )
-        })
-    }
-    public mapDataRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType> {
-        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
-            this.process(
-                newLimiter,
-                (data, abort) => newOnData({ key: data.key, value: onData(data.value, data.key) }, abort),
-                aborted => newOnEnd(aborted)
             )
         })
     }
@@ -53,10 +85,10 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
             const results: { [key: string]: TargetType } = {}
             const errors: { [key: string]: IntermediateErrorType } = {}
             let hasErrors = false
-            this.process(
+            this.processStream(
                 limiter,
                 data => {
-                    promisify(data.value, data.key).handle(
+                    promisify(data.value, data.key).handleUnsafePromise(
                         error => {
                             hasErrors = true
                             errors[data.key] = error
@@ -68,7 +100,7 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                 },
                 aborted => {
                     if (aborted || hasErrors) {
-                        errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors))).handle(result => {
+                        errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors))).handleSafePromise(result => {
                             onError(result)
                         })
                     } else {
@@ -76,29 +108,6 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                     }
                 }
             )
-        })
-
-    }
-
-    public filterRaw<NewDataType>(
-        onData: (data: DataType, key: string) => [false] | [true, NewDataType],
-    ): KeyValueStream<NewDataType> {
-        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
-            this.process(
-                newLimiter,
-                (data, abort) => {
-                    const filterResult = onData(data.value, data.key)
-                    if (filterResult[0]) {
-                        newOnData({ key: data.key, value: filterResult[1] }, abort)
-                    }
-                },
-                aborted => newOnEnd(aborted)
-            )
-        })
-    }
-    public toKeysStream() {
-        return new Stream<string>((limiter, onData, onEnd) => {
-            this.process(limiter, (data, abort) => onData(data.key, abort), onEnd)
         })
     }
 }

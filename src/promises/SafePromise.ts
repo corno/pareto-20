@@ -9,7 +9,7 @@ export class SafePromise<T> implements IInSafePromise<T> {
     constructor(callerFunction: SafeCallerFunction<T>) {
         this.callerFunction = callerFunction
     }
-    public handle(onResult: (result: T) => void): void {
+    public handleSafePromise(onResult: (result: T) => void): void {
         if (this.isCalled) {
             // console.log("callerFunction")
             // console.log(this.callerFunction.toString())
@@ -20,26 +20,28 @@ export class SafePromise<T> implements IInSafePromise<T> {
         this.isCalled = true
         this.callerFunction(onResult)
     }
-    public mapResultRaw<NewType>(onResult: (result: T) => NewType): SafePromise<NewType> {
+
+
+    public mapResult<NewType>(onResult: (result: T) => SafePromise<NewType>): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
-            this.handle(res => {
-                newOnResult(onResult(res))
+            this.handleSafePromise(res => {
+                onResult(res).handleSafePromise(newOnResult)
             })
 
         })
     }
-    public mapResult<NewType>(onResult: (result: T) => SafePromise<NewType>): SafePromise<NewType> {
+    public mapResultRaw<NewType>(onResult: (result: T) => NewType): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
-            this.handle(res => {
-                onResult(res).handle(newOnResult)
+            this.handleSafePromise(res => {
+                newOnResult(onResult(res))
             })
 
         })
     }
     public try<ResultType, ErrorType>(callback: (result: T) => IInUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
         return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
-            this.handle(res => {
-                callback(res).handle(onError, onSuccess)
+            this.handleSafePromise(res => {
+                callback(res).handleUnsafePromise(onError, onSuccess)
             })
 
         })

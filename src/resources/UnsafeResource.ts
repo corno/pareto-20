@@ -6,7 +6,7 @@ export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUns
     constructor(openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>) {
         this.openFunction = openFunction
     }
-    public open(onError: (openError: OpenError) => void, onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void) {
+    public openUnsafeOpenableResource(onError: (openError: OpenError) => void, onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void) {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: (onCloseError: (closeError: CloseError) => void) => void) => {

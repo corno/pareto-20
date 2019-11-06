@@ -7,7 +7,7 @@ export class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<Res
         this.resource = resource
         this.closer = closer
     }
-    public close() {
+    public closeSafeOpenedResource() {
         this.closer()
     }
 }

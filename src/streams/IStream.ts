@@ -1,5 +1,6 @@
-import { IInSafePromise, IInStream, StreamLimiter } from "pareto-api"
+import { IInSafePromise, IInStream, IInUnsafePromise, StreamLimiter } from "pareto-api"
 import { ISafePromise } from "../promises/ISafePromise"
+import { IUnsafePromise } from "../promises/IUnsafePromise"
 
 export type FilterResult<DataType> = [false] | [true, DataType]
 
@@ -8,9 +9,15 @@ export type StreamGetter<DataType> = (limiter: StreamLimiter, onData: (data: Dat
 
 
 export interface IStream<DataType> extends IInStream<DataType> {
-    mapDataRaw<NewDataType>(onData: (data: DataType) => NewDataType): IStream<NewDataType>
-    filterRaw<NewDataType>(onData: (data: DataType) => FilterResult<NewDataType>, ): IStream<NewDataType>
-    filter<NewDataType>(onData: (data: DataType) => IInSafePromise<FilterResult<NewDataType>>): IStream<NewDataType>
-    reduceRaw<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType) => ResultType): ISafePromise<ResultType>
     toArray(limiter: StreamLimiter, onAborted: (() => void) | null): DataType[]
+
+    map<NewDataType>(onData: (data: DataType) => IInSafePromise<NewDataType>): IStream<NewDataType>
+    mapRaw<NewDataType>(onData: (data: DataType) => NewDataType): IStream<NewDataType>
+    filter<NewDataType>(onData: (data: DataType) => IInSafePromise<FilterResult<NewDataType>>): IStream<NewDataType>
+    reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType) => IInSafePromise<ResultType>): ISafePromise<ResultType>
+    tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
+        limiter: StreamLimiter,
+        promisify: (entry: DataType) => IInUnsafePromise<TargetType, IntermediateErrorType>,
+        errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>
+    ): IUnsafePromise<IStream<TargetType>, TargetErrorType>
 }
