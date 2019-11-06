@@ -1,4 +1,5 @@
 import { IUnsafeResource } from "./IUnsafeResource"
+import { UnsafeOnOpenResource} from "./UnsafeOnOpenResource"
 import { UnsafeOpenedResource } from "./UnsafeOpenedResource"
 
 export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeResource<ResourceType, OpenError, CloseError> {
@@ -13,6 +14,20 @@ export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUns
                 onOpened(new UnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
             }
         )
+    }
+
+    public suppressCloseError(closeErrorHandler: (error: CloseError) => void) {
+        return new UnsafeOnOpenResource<ResourceType, OpenError>((onOpenError, onSuccess) => {
+            this.openUnsafeOpenableResource(
+                onOpenError,
+                success => onSuccess(
+                    success.resource,
+                    () => {
+                        success.closeUnsafeOpenedResource(closeErrorHandler)
+                    }
+                )
+            )
+        })
     }
 }
 

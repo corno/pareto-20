@@ -1,4 +1,6 @@
 import { IInSafePromise } from "pareto-api"
+import { ISafePromise, SafeCallerFunction } from "../promises/ISafePromise"
+import { SafePromise } from "../promises/SafePromise"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { SafeOpenedResource } from "./SafeOpenedResource"
 
@@ -14,6 +16,24 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
                 onOpened(new SafeOpenedResource<ResourceType>(resource, closer))
             }
         )
+    }
+
+    public with<ResultType>(
+        onOpenError: (error: OpenError) => IInSafePromise<ResultType>,
+        onOpenSuccess: (openReource: ResourceType) => IInSafePromise<ResultType>
+    ): ISafePromise<ResultType> {
+        const newFunc: SafeCallerFunction<ResultType> = onResult => {
+            this.openUnsafeOpenableResource(
+                err => {
+                    onOpenError(err).handleSafePromise(onResult)
+                },
+                res => {
+                    onOpenSuccess(res.resource).handleSafePromise(onResult)
+                    res.closeSafeOpenedResource()
+                }
+            )
+        }
+        return new SafePromise<ResultType>(newFunc)
     }
     public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => IInSafePromise<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {

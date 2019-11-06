@@ -1,4 +1,4 @@
-import { IInKeyValueStream, IInSafePromise, IInSafeResource, IInStream, IInUnsafeOnCloseResource, IInUnsafeOnOpenResource, IInUnsafePromise, IInUnsafeResource } from "pareto-api"
+import { IInKeyValueStream, IInSafePromise, IInStream, IInUnsafePromise } from "pareto-api"
 
 import { assertUnreachable } from "./genericFunctions"
 
@@ -65,28 +65,28 @@ export const wrap = {
             promise.handleUnsafePromise(onError, onSucces)
         })
     },
-    SafeResource: <T>(safeResource: IInSafeResource<T>): ISafeResource<T> => {
+    SafeResource: <T>(safeResource: ISafeResource<T>): ISafeResource<T> => {
         return new SafeResource<T>(onOpened => {
             safeResource.openSafeOpenableResource(openedResource => {
                 onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
             })
         })
     },
-    UnsafeResource: <T, OpenError, CloseError>(unsafeResource: IInUnsafeResource<T, OpenError, CloseError>): IUnsafeResource<T, OpenError, CloseError> => {
+    UnsafeResource: <T, OpenError, CloseError>(unsafeResource: IUnsafeResource<T, OpenError, CloseError>): IUnsafeResource<T, OpenError, CloseError> => {
         return new UnsafeResource<T, OpenError, CloseError>((onError, onOpened) => {
             unsafeResource.openUnsafeOpenableResource(onError, openedResource => {
                 onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
             })
         })
     },
-    UnsafeOnOpenResource: <T, OpenError>(unsafeOnOpenResource: IInUnsafeOnOpenResource<T, OpenError>): IUnsafeOnOpenResource<T, OpenError> => {
+    UnsafeOnOpenResource: <T, OpenError>(unsafeOnOpenResource: IUnsafeOnOpenResource<T, OpenError>): IUnsafeOnOpenResource<T, OpenError> => {
         return new UnsafeOnOpenResource<T, OpenError>((onError, onOpened) => {
             unsafeOnOpenResource.openUnsafeOpenableResource(onError, openedResource => {
                 onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
             })
         })
     },
-    UnsafeOnCloseResource: <T, CloseError>(unsafeOnCloseResource: IInUnsafeOnCloseResource<T, CloseError>): IUnsafeOnCloseResource<T, CloseError> => {
+    UnsafeOnCloseResource: <T, CloseError>(unsafeOnCloseResource: IUnsafeOnCloseResource<T, CloseError>): IUnsafeOnCloseResource<T, CloseError> => {
         return new UnsafeOnCloseResource<T, CloseError>(onOpened => {
             unsafeOnCloseResource.openSafeOpenableResource(openedResource => {
                 onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
