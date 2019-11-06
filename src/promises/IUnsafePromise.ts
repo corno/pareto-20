@@ -1,4 +1,5 @@
 import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import { ISafePromise} from "./ISafePromise"
 
 export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<ResultType, ErrorType> {
     mapResult<NewResultType>(onSuccess: (result: ResultType) => IInSafePromise<NewResultType>): IUnsafePromise<NewResultType, ErrorType>
@@ -12,4 +13,9 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
         onError: (error: ErrorType) => IInUnsafePromise<NewResultType, NewErrorType>,
         onSuccess: (result: ResultType) => IInUnsafePromise<NewResultType, NewErrorType>
     ): IUnsafePromise<NewResultType, NewErrorType>
+    catch(onError: (error: ErrorType) => ResultType, ): ISafePromise<ResultType>
+    reworkAndCatch <NewResultType>(
+        onError: (error: ErrorType) => IInSafePromise<NewResultType>,
+        onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
+    ): ISafePromise<NewResultType>
 }

@@ -1,6 +1,7 @@
 import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import { ISafePromise } from "./ISafePromise"
 import { IUnsafePromise } from "./IUnsafePromise"
-import { result } from "./SafePromise"
+import { result, SafePromise } from "./SafePromise"
 
 export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<ResultType, ErrorType> {
     private isCalled: boolean
@@ -70,8 +71,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                 err => {
                     newOnError(err)
                 },
-                result => {
-                    onSuccess(result).handleUnsafePromise(newOnError, newOnSuccess)
+                res => {
+                    onSuccess(res).handleUnsafePromise(newOnError, newOnSuccess)
                 }
             )
         })
@@ -84,8 +85,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                 err => {
                     onError(err).handleUnsafePromise(newOnError, newOnSuccess)
                 },
-                result => {
-                    newOnSuccess(result)
+                res => {
+                    newOnSuccess(res)
                 }
             )
         })
@@ -96,8 +97,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                 err => {
                     newOnSuccess(err)
                 },
-                result => {
-                    newOnError(result)
+                res => {
+                    newOnError(res)
                 }
             )
         })
@@ -111,9 +112,36 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                 err => {
                     onError(err).handleUnsafePromise(newOnError, newOnSuccess)
                 },
-                result => {
-                    onSuccess(result).handleUnsafePromise(newOnError, newOnSuccess)
+                res => {
+                    onSuccess(res).handleUnsafePromise(newOnError, newOnSuccess)
                 }
+            )
+        })
+    }
+    public catch(onError: (error: ErrorType) => ResultType, ): ISafePromise<ResultType> {
+        return new SafePromise<ResultType>(onResult => {
+            this.handleUnsafePromise(
+                err => {
+                    onResult(onError(err))
+                },
+                res => {
+                    onResult(res)
+                },
+            )
+        })
+    }
+    public reworkAndCatch <NewResultType>(
+        onError: (error: ErrorType) => IInSafePromise<NewResultType>,
+        onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
+    ): ISafePromise<NewResultType> {
+        return new SafePromise<NewResultType>(onResult => {
+            this.handleUnsafePromise(
+                err => {
+                    onError(err).handleSafePromise(res => onResult(res))
+                },
+                data => {
+                    onSuccess(data).handleSafePromise(res => onResult(res))
+                },
             )
         })
     }
@@ -130,9 +158,9 @@ export function wrapUnsafeFunction<ResultType, ErrorType>(func: UnsafeCallerFunc
     return new UnsafePromise(func)
 }
 
-export const success = <ResultType, ErrorType>(result: ResultType): IUnsafePromise<ResultType, ErrorType> => {
+export const success = <ResultType, ErrorType>(res: ResultType): IUnsafePromise<ResultType, ErrorType> => {
     const handler: UnsafeCallerFunction<ResultType, ErrorType> = (_onError: (error: ErrorType) => void, onSuccess: (result: ResultType) => void) => {
-        onSuccess(result)
+        onSuccess(res)
     }
     return new UnsafePromise<ResultType, ErrorType>(handler)
 }
