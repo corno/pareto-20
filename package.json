@@ -4,10 +4,10 @@
   "description": "utils for the very specific 20% of the code",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rd /s /q .\\dist && tsc",
     "lint": "tslint --project tsconfig.json ./src/*",
-    "pubMin": "git diff --exit-code ncu -u --packageFile package.json && npm install && rd /s /q .\\dist && Tssc && npm run lint && npm run test && npm version minor && git push && npm publish",
-    "pubPatch": "git diff --exit-code ncu -u --packageFile package.json && npm install && rd /s /q .\\dist && tsc && npm run lint && npm run test && npm version patch && git push && npm publish",
+    "pubMin": "git diff --exit-code && ncu -u --packageFile package.json && npm install && rd /s /q .\\dist && tsc && npm run lint && npm run test && npm version minor && git push && npm publish",
+    "pubPatch": "git diff --exit-code && ncu -u --packageFile package.json && npm install && rd /s /q .\\dist && tsc && npm run lint && npm run test && npm version patch && git push && npm publish",
     "test": "tsc && node ./dist/test",
     "u2l": "ncu -u --packageFile package.json && nsi"
   },
