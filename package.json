@@ -2,7 +2,7 @@
   "name": "pareto-20",
   "version": "0.1.0",
   "description": "utils for the very specific 20% of the code",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "rd /s /q .\\dist && tsc",
     "lint": "tslint --project tsconfig.json",
@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "corno",
   "license": "ISC",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "prepublish": "tsc",
   "repository": {
     "type": "git",
