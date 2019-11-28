@@ -1,8 +1,8 @@
-import { IUnsafeOnCloseResource } from "./IUnsafeOnCloseResource"
-import { UnsafeOnCloseFunction, UnsafeOpenedResource } from "./UnsafeOpenedResource"
 import { IInSafePromise } from "pareto-api"
-import { SafeResource } from "./SafeResource"
 import { ISafeResource } from "./ISafeResource"
+import { IUnsafeOnCloseResource } from "./IUnsafeOnCloseResource"
+import { SafeResource } from "./SafeResource"
+import { UnsafeOnCloseFunction, UnsafeOpenedResource } from "./UnsafeOpenedResource"
 
 export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseResource<ResourceType, CloseError> {
     private readonly openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>
