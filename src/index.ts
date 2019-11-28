@@ -1,3 +1,4 @@
+export * from "pareto-api"
 
 export * from "./genericFunctions"
 
