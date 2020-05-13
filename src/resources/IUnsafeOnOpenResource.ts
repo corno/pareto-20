@@ -1,3 +1,6 @@
+/* eslint
+    "@typescript-eslint/no-empty-interface": off
+*/
 import { IInSafeOpenedResource, IInSafePromise, IInUnsafeOpenableResource } from "pareto-api"
 import { ISafePromise } from "../promises/ISafePromise"
 

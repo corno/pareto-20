@@ -56,11 +56,11 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                 },
                 res => {
                     newOnSuccess(res)
-                }
+                },
             )
         })
     }
-    public mapErrorRaw<NewErrorType>(onError: (error: ErrorType) => NewErrorType, ) {
+    public mapErrorRaw<NewErrorType>(onError: (error: ErrorType) => NewErrorType) {
         return this.mapError(err => result(onError(err)))
     }
     public try<NewResultType>(
@@ -118,7 +118,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
             )
         })
     }
-    public catch(onError: (error: ErrorType) => ResultType, ): ISafePromise<ResultType> {
+    public catch(onError: (error: ErrorType) => ResultType): ISafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             this.handleUnsafePromise(
                 err => {

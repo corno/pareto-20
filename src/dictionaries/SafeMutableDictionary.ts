@@ -1,3 +1,6 @@
+/* eslint
+    "max-classes-per-file": off
+*/
 import {
     IInSafeLooseDictionary,
     IInSafeStrictDictionary,

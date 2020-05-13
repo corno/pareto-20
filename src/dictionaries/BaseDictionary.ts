@@ -31,7 +31,9 @@ export class BaseDictionary<StoredData> {
     public toKeysStream() {
         return new Stream<string>((_limiter, onData, onEnd) => {
             //FIX implement limiter and abort
-            Object.keys(this.implementation).forEach(key => onData(key, () => { }))
+            Object.keys(this.implementation).forEach(key => onData(key, () => {
+                //
+            }))
             onEnd(false)
         })
     }
