@@ -5,7 +5,7 @@ import {
 
 export function streamifyDictionary<ElementType>(dictionary: { [key: string]: ElementType }) {
     const keys = Object.keys(dictionary)
-    return (limiter: StreamLimiter, onData: (data: KeyValuePair<ElementType>, abort: () => void) => void, onEnd: (aborted: boolean) => void) => {
+    return (limiter: null | StreamLimiter, onData: (data: KeyValuePair<ElementType>, abort: () => void) => void, onEnd: (aborted: boolean) => void) => {
         function pushData(theArray: string[], limited: boolean) {
             let abort = false
             theArray.forEach(key => {

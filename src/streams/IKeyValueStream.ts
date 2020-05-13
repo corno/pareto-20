@@ -11,7 +11,7 @@ export interface IKeyValueStream<DataType> extends IInKeyValueStream<DataType> {
     reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType) => IInSafePromise<ResultType>): ISafePromise<ResultType>
     filter<NewDataType>(onData: (data: DataType, key: string) => [false] | [true, IInSafePromise<NewDataType>]): IKeyValueStream<NewDataType>
     tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
-        limiter: StreamLimiter,
+        limiter: null | StreamLimiter,
         promisify: (entry: DataType, entryName: string) => IInUnsafePromise<TargetType, IntermediateErrorType>,
         errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>
     ): IUnsafePromise<IKeyValueStream<TargetType>, TargetErrorType>

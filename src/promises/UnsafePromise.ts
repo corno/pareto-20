@@ -211,31 +211,48 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
     }
 }
 
-export type UnsafeCallerFunction<ResultType, ErrorType> = (onError: (error: ErrorType) => void, onResult: (result: ResultType) => void) => void
+export type UnsafeCallerFunction<ResultType, ErrorType> = (
+    onError: (error: ErrorType) => void,
+    onResult: (result: ResultType) => void
+) => void
 
 export type DefaultError = {
     "message": string
 }
 
 
-export function wrapUnsafeFunction<ResultType, ErrorType>(func: UnsafeCallerFunction<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
+export function wrapUnsafeFunction<ResultType, ErrorType>(
+    func: (
+        onError: (error: ErrorType) => void,
+        onResult: (result: ResultType) => void
+    ) => void
+): IUnsafePromise<ResultType, ErrorType> {
     return new UnsafePromise(func)
 }
 
 export const success = <ResultType, ErrorType>(res: ResultType): IUnsafePromise<ResultType, ErrorType> => {
-    const handler: UnsafeCallerFunction<ResultType, ErrorType> = (_onError: (error: ErrorType) => void, onSuccess: (result: ResultType) => void) => {
+    const handler: UnsafeCallerFunction<ResultType, ErrorType> = (
+        _onError: (error: ErrorType) => void,
+        onSuccess: (result: ResultType) => void
+    ) => {
         onSuccess(res)
     }
     return new UnsafePromise<ResultType, ErrorType>(handler)
 }
+
 export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafePromise<ResultType, ErrorType> => {
-    const handler: UnsafeCallerFunction<ResultType, ErrorType> = (onError: (error: ErrorType) => void, _onSuccess: (result: ResultType) => void) => {
+    const handler: UnsafeCallerFunction<ResultType, ErrorType> = (
+        onError: (error: ErrorType) => void,
+        _onSuccess: (result: ResultType) => void
+    ) => {
         onError(err)
     }
     return new UnsafePromise<ResultType, ErrorType>(handler)
 }
 
-export function wrap<SourceResultType, SourceErrorType>(promise: IInUnsafePromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> {
+export function wrap<SourceResultType, SourceErrorType>(
+    promise: IInUnsafePromise<SourceResultType, SourceErrorType>
+): IUnsafePromise<SourceResultType, SourceErrorType> {
     return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {
         promise.handleUnsafePromise(onError, onSucces)
     })

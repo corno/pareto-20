@@ -7,7 +7,7 @@ import { Stream } from "./Stream"
 
 export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateErrorType, ErrorType>(
     stream: IInStream<DataType>,
-    limiter: StreamLimiter,
+    limiter: null | StreamLimiter,
     promisify: (entry: DataType) => IInUnsafePromise<TargetType, IntermediateErrorType>,
     createError: (aborted: boolean, errors: Stream<IntermediateErrorType>) => ErrorType
 ): IUnsafePromise<IStream<TargetType>, ErrorType> {

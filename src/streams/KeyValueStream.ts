@@ -9,11 +9,11 @@ import { streamifyDictionary } from "./streamifyDictionary"
 
 type OnData<DataType> = (data: KeyValuePair<DataType>, abort: () => void) => void
 
-export type KeyValueStreamGetter<DataType> = (limiter: StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+export type KeyValueStreamGetter<DataType> = (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
 
 // tslint:disable-next-line: max-classes-per-file
 export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
-    public readonly processStream: (limiter: StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+    public readonly processStream: (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
     constructor(
         streamGetter: KeyValueStreamGetter<DataType>,
     ) {
@@ -77,7 +77,7 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
         })
     }
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
-        limiter: StreamLimiter,
+        limiter: null | StreamLimiter,
         promisify: (entry: DataType, entryName: string) => IInUnsafePromise<TargetType, IntermediateErrorType>,
         errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>
     ): IUnsafePromise<IKeyValueStream<TargetType>, TargetErrorType> {

@@ -13,7 +13,7 @@ export class Stream<DataType> implements IStream<DataType> {
     ) {
         this.processStream = streamGetter
     }
-    public toArray(limiter: StreamLimiter, onAborted: (() => void) | null) {
+    public toArray(limiter: null | StreamLimiter, onAborted: (() => void) | null) {
         const array: DataType[] = []
         this.processStream(limiter, data => array.push(data), aborted => { if (aborted && onAborted !== null) { onAborted() } })
         return array
@@ -71,7 +71,7 @@ export class Stream<DataType> implements IStream<DataType> {
         })
     }
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
-        limiter: StreamLimiter,
+        limiter: null | StreamLimiter,
         promisify: (entry: DataType) => IInUnsafePromise<TargetType, IntermediateErrorType>,
         errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType>) => IInSafePromise<TargetErrorType>
     ): IUnsafePromise<IStream<TargetType>, TargetErrorType> {
