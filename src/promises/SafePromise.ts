@@ -9,6 +9,12 @@ export class SafePromise<T> implements IInSafePromise<T> {
     constructor(callerFunction: SafeCallerFunction<T>) {
         this.callerFunction = callerFunction
     }
+    /**
+     * use this function to start resolving the promise
+     * this function is not pure and should only be called at the
+     * outskirts of the program
+     * @param onResult
+     */
     public handleSafePromise(onResult: (result: T) => void): void {
         if (this.isCalled) {
             // console.log("callerFunction")
@@ -20,8 +26,12 @@ export class SafePromise<T> implements IInSafePromise<T> {
         this.isCalled = true
         this.callerFunction(onResult)
     }
-
-
+    /**
+     * change the result state
+     * the callback should return a promise
+     * if you do not want to return a promise, use 'mapResultRaw'
+     * @param onResult
+     */
     public mapResult<NewType>(onResult: (result: T) => SafePromise<NewType>): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
             this.handleSafePromise(res => {
@@ -30,6 +40,12 @@ export class SafePromise<T> implements IInSafePromise<T> {
 
         })
     }
+    /**
+     * change the success state
+     * the callback does not have to and should not return a promise
+     * if you want to return a promise, use 'mapResult'
+     * @param onResult
+     */
     public mapResultRaw<NewType>(onResult: (result: T) => NewType): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
             this.handleSafePromise(res => {
@@ -38,6 +54,11 @@ export class SafePromise<T> implements IInSafePromise<T> {
 
         })
     }
+    /**
+     * convert this promise into an unsafe promise in a success state
+     * if this fails the new unsafe promise will be in an error state
+     * @param callback
+     */
     public try<ResultType, ErrorType>(callback: (result: T) => IInUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
         return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
             this.handleSafePromise(res => {
