@@ -5,7 +5,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
     /**
      * change the success state
      * the callback should return a safe(!) promise
-     * if you do not want to return a promise, use 'mapResultRaw'
+     * if you cannot return a promise, use 'mapResultRaw'
      * if you cannot return a safe promise, use 'try'
      * @param onSuccess
      */
@@ -24,7 +24,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
     /**
      * change the error state
      * the callback should return a safe(!) promise
-     * if you do not want to return a promise, use 'mapErrorRaw'
+     * if you cannot return a promise, use 'mapErrorRaw'
      * if you cannot return a safe promise, use 'tryToCatch'
      * @param onError
      */
@@ -91,4 +91,10 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
         onError: (error: ErrorType) => IInSafePromise<NewResultType>,
         onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
     ): ISafePromise<NewResultType>
+    /**
+     * convert this unsafe promise to the JavaScript native Promise
+     * only do this to interface with code that requires native Promises
+     * @param promise
+     */
+    convertToNativePromise(): Promise<ResultType>
 }

@@ -67,6 +67,15 @@ export class SafePromise<T> implements IInSafePromise<T> {
 
         })
     }
+    public convertToNativePromise() {
+        return new Promise<T>(resolve => {
+            this.handleSafePromise(
+                resultData => {
+                    resolve(resultData)
+                }
+            )
+        })
+    }
 }
 
 export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): ISafePromise<ResultType> {

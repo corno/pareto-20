@@ -24,4 +24,10 @@ export interface ISafePromise<T> extends IInSafePromise<T> {
      * @param callback
      */
     try<ResultType, ErrorType>(callback: (result: T) => IInUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType>
+    /**
+     * convert this safe promise to the JavaScript native Promise
+     * only do this to interface with code that requires native Promises
+     * @param promise
+     */
+    convertToNativePromise(): Promise<T>
 }
