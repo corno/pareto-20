@@ -11,7 +11,7 @@ import {
 } from "pareto-api"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { result, SafePromise } from "../promises/SafePromise"
-import { error, success, wrap as wrapUnsafePromise } from "../promises/UnsafePromise"
+import { error, success, wrapUnsafePromise } from "../promises/UnsafePromise"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"

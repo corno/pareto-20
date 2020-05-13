@@ -8,12 +8,11 @@ import { KeyValueStream } from "../streams/KeyValueStream"
 import { Stream } from "../streams/Stream"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { ILookup } from "./ILookup"
-import { ReadOnlyDictionary } from "./ReadOnlyDictionary"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
 //     array.forEach((element, index) => dictionary[keys[index]] = element)
-//     return new ReadOnlyDictionary<Type>(dictionary)
+//     return new BaseDictionary<Type>(dictionary)
 // }
 
 export class BaseDictionary<StoredData> {
@@ -54,9 +53,9 @@ export class BaseDictionary<StoredData> {
     public match<SupportType, TargetType, NewErrorType>(
         lookup: IInSafeLookup<SupportType>,
         resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
-        missingEntriesErrorCreator: (errors: ReadOnlyDictionary<StoredData>) => NewErrorType
+        missingEntriesErrorCreator: (errors: BaseDictionary<StoredData>) => NewErrorType
     ) {
-        return new UnsafePromise<ReadOnlyDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
+        return new UnsafePromise<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
             const resultDictionary: { [key: string]: TargetType } = {}
             const errorDictionary: { [key: string]: StoredData } = {}
             let hasErrors = false
@@ -75,9 +74,9 @@ export class BaseDictionary<StoredData> {
                 )
             })
             if (hasErrors) {
-                onError(missingEntriesErrorCreator(new ReadOnlyDictionary(errorDictionary)))
+                onError(missingEntriesErrorCreator(new BaseDictionary(errorDictionary)))
             } else {
-                onSuccess(new ReadOnlyDictionary(resultDictionary))
+                onSuccess(new BaseDictionary(resultDictionary))
             }
         })
     }

@@ -250,7 +250,7 @@ export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafePromise<Res
     return new UnsafePromise<ResultType, ErrorType>(handler)
 }
 
-export function wrap<SourceResultType, SourceErrorType>(
+export function wrapUnsafePromise<SourceResultType, SourceErrorType>(
     promise: IInUnsafePromise<SourceResultType, SourceErrorType>
 ): IUnsafePromise<SourceResultType, SourceErrorType> {
     return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {

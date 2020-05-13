@@ -10,7 +10,7 @@ import {
     UnsafeTwoWayError,
 } from "pareto-api"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
-import { error, success, wrap } from "../promises/UnsafePromise"
+import { error, success, wrapUnsafePromise } from "../promises/UnsafePromise"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
@@ -81,7 +81,7 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         if (this.implementation[entryName] !== undefined) {
             return error(["entry already exists"])
         }
-        return wrap(this.creator(createData, entryName)
+        return wrapUnsafePromise(this.creator(createData, entryName)
         ).mapErrorRaw<UnsafeEntryAlreadyExistsError<CustomErrorType>>(customError =>
             ["custom", customError]
         ).mapResultRaw(data => {
