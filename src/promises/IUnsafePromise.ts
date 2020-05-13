@@ -4,8 +4,9 @@ import { ISafePromise } from "./ISafePromise"
 export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<ResultType, ErrorType> {
     /**
      * change the success state
-     * the callback should return a promise
+     * the callback should return a safe(!) promise
      * if you do not want to return a promise, use 'mapResultRaw'
+     * if you cannot return a safe promise, use 'try'
      * @param onSuccess
      */
     mapResult<NewResultType>(
@@ -22,8 +23,9 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
     ): IUnsafePromise<NewResultType, ErrorType>
     /**
      * change the error state
-     * the callback should return a promise
+     * the callback should return a safe(!) promise
      * if you do not want to return a promise, use 'mapErrorRaw'
+     * if you cannot return a safe promise, use 'tryToCatch'
      * @param onError
      */
     mapError<NewErrorType>(
