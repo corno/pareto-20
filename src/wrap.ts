@@ -13,14 +13,14 @@ import { KeyValueStream } from "./streams/KeyValueStream"
 import { Stream } from "./streams/Stream"
 
 
-import { ISafeResource } from "./resources/ISafeResource"
-import { IUnsafeOnCloseResource } from "./resources/IUnsafeOnCloseResource"
-import { IUnsafeOnOpenResource } from "./resources/IUnsafeOnOpenResource"
-import { IUnsafeResource } from "./resources/IUnsafeResource"
-import { SafeResource } from "./resources/SafeResource"
-import { UnsafeOnCloseResource } from "./resources/UnsafeOnCloseResource"
-import { UnsafeOnOpenResource } from "./resources/UnsafeOnOpenResource"
-import { UnsafeResource } from "./resources/UnsafeResource"
+// import { ISafeResource } from "./resources/ISafeResource"
+// import { IUnsafeOnCloseResource } from "./resources/IUnsafeOnCloseResource"
+// import { IUnsafeOnOpenResource } from "./resources/IUnsafeOnOpenResource"
+// import { IUnsafeResource } from "./resources/IUnsafeResource"
+// import { SafeResource } from "./resources/SafeResource"
+// import { UnsafeOnCloseResource } from "./resources/UnsafeOnCloseResource"
+// import { UnsafeOnOpenResource } from "./resources/UnsafeOnOpenResource"
+// import { UnsafeResource } from "./resources/UnsafeResource"
 
 export type OnKeyConflict =
     ["ignore"]
@@ -65,34 +65,42 @@ export const wrap = {
             promise.handleUnsafePromise(onError, onSucces)
         })
     },
-    SafeResource: <T>(safeResource: ISafeResource<T>): ISafeResource<T> => {
-        return new SafeResource<T>(onOpened => {
-            safeResource.openSafeOpenableResource(openedResource => {
-                onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
-            })
-        })
-    },
-    UnsafeResource: <T, OpenError, CloseError>(unsafeResource: IUnsafeResource<T, OpenError, CloseError>): IUnsafeResource<T, OpenError, CloseError> => {
-        return new UnsafeResource<T, OpenError, CloseError>((onError, onOpened) => {
-            unsafeResource.openUnsafeOpenableResource(onError, openedResource => {
-                onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
-            })
-        })
-    },
-    UnsafeOnOpenResource: <T, OpenError>(unsafeOnOpenResource: IUnsafeOnOpenResource<T, OpenError>): IUnsafeOnOpenResource<T, OpenError> => {
-        return new UnsafeOnOpenResource<T, OpenError>((onError, onOpened) => {
-            unsafeOnOpenResource.openUnsafeOpenableResource(onError, openedResource => {
-                onOpened(openedResource.resource, openedResource.closeSafeOpenedResource)
-            })
-        })
-    },
-    UnsafeOnCloseResource: <T, CloseError>(unsafeOnCloseResource: IUnsafeOnCloseResource<T, CloseError>): IUnsafeOnCloseResource<T, CloseError> => {
-        return new UnsafeOnCloseResource<T, CloseError>(onOpened => {
-            unsafeOnCloseResource.openSafeOpenableResource(openedResource => {
-                onOpened(openedResource.resource, openedResource.closeUnsafeOpenedResource)
-            })
-        })
-    },
+    // SafeResource: <T>(safeResource: ISafeResource<T>): ISafeResource<T> => {
+    //     return new SafeResource<T>(onOpened => {
+    //         safeResource.openSafeOpenableResource(openedResource => {
+    //             onOpened(openedResource.resource, () => {
+    //                 openedResource.closeSafeOpenedResource()
+    //             })
+    //         })
+    //     })
+    // },
+    // UnsafeResource: <T, OpenError, CloseError>(unsafeResource: IUnsafeResource<T, OpenError, CloseError>): IUnsafeResource<T, OpenError, CloseError> => {
+    //     return new UnsafeResource<T, OpenError, CloseError>((onError, onOpened) => {
+    //         unsafeResource.openUnsafeOpenableResource(onError, openedResource => {
+    //             onOpened(openedResource.resource, onError2 => {
+    //                 openedResource.closeUnsafeOpenedResource(onError2)
+    //             })
+    //         })
+    //     })
+    // },
+    // UnsafeOnOpenResource: <T, OpenError>(unsafeOnOpenResource: IUnsafeOnOpenResource<T, OpenError>): IUnsafeOnOpenResource<T, OpenError> => {
+    //     return new UnsafeOnOpenResource<T, OpenError>((onError, onOpened) => {
+    //         unsafeOnOpenResource.openUnsafeOpenableResource(onError, openedResource => {
+    //             onOpened(openedResource.resource, () => {
+    //                 openedResource.closeSafeOpenedResource()
+    //             })
+    //         })
+    //     })
+    // },
+    // UnsafeOnCloseResource: <T, CloseError>(unsafeOnCloseResource: IUnsafeOnCloseResource<T, CloseError>): IUnsafeOnCloseResource<T, CloseError> => {
+    //     return new UnsafeOnCloseResource<T, CloseError>(onOpened => {
+    //         unsafeOnCloseResource.openSafeOpenableResource(openedResource => {
+    //             onOpened(openedResource.resource, onError => {
+    //                 openedResource.closeUnsafeOpenedResource(onError)
+    //             })
+    //         })
+    //     })
+    // },
     Stream: <DataType>(stream: IInStream<DataType>): IStream<DataType> => {
         return new Stream<DataType>((limiter, onData, onEnd) => {
             stream.processStream(limiter, onData, onEnd)
