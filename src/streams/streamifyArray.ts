@@ -1,7 +1,12 @@
 
-import { StreamGetter } from "./IStream"
+import { ProcessStream } from "./IStream"
 
-export function streamifyArray<ElementType>(array: ElementType[]): StreamGetter<ElementType> {
+/**
+ * this function can be used as the argument to a stream: 'new Stream(streamifyArray(["x"]))'
+ * @param array
+ * @returns a function that processes the data from the stream
+ */
+export function streamifyArray<ElementType>(array: ElementType[]): ProcessStream<ElementType> {
     return (limiter, onData, onEnd) => {
         function pushData(theArray: ElementType[], limited: boolean) {
             let abort = false

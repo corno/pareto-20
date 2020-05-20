@@ -3,13 +3,13 @@ import { ISafePromise } from "../promises/ISafePromise"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { SafePromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
-import { FilterResult, IStream, StreamGetter } from "./IStream"
+import { FilterResult, IStream, ProcessStream } from "./IStream"
 import { streamifyArray} from "./streamifyArray"
 
 export class Stream<DataType> implements IStream<DataType> {
-    public readonly processStream: StreamGetter<DataType>
+    public readonly processStream: ProcessStream<DataType>
     constructor(
-        streamGetter: StreamGetter<DataType>,
+        streamGetter: ProcessStream<DataType>,
     ) {
         this.processStream = streamGetter
     }

@@ -11,7 +11,6 @@ type OnData<DataType> = (data: KeyValuePair<DataType>, abort: () => void) => voi
 
 export type KeyValueStreamGetter<DataType> = (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
 
-// tslint:disable-next-line: max-classes-per-file
 export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
     public readonly processStream: (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
     constructor(

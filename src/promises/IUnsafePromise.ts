@@ -67,6 +67,9 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
     /**
      * convert this unsafe promise into a new unsafe promise by
      * converting both the success state and the error state into new states
+     * success states can become error states and vice versa
+     * if either the type of the success state or the error state stays the same
+     * it is preferred to use a combination of 'try' and 'tryToCatch' instead of this method
      * @param onError
      * @param onSuccess
      */

@@ -4,8 +4,10 @@ import { IUnsafePromise } from "../promises/IUnsafePromise"
 
 export type FilterResult<DataType> = [false] | [true, DataType]
 
-
-export type StreamGetter<DataType> = (limiter: null | StreamLimiter, onData: (data: DataType, abort: () => void) => void, onEnd: (aborted: boolean) => void) => void
+/**
+ * a function that can process a stream by implementing handlers for 'onData' and 'onEnd'
+ */
+export type ProcessStream<DataType> = (limiter: null | StreamLimiter, onData: (data: DataType, abort: () => void) => void, onEnd: (aborted: boolean) => void) => void
 
 
 export interface IStream<DataType> extends IInStream<DataType> {
