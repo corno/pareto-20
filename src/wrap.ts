@@ -1,7 +1,5 @@
 import { IInKeyValueStream, IInSafePromise, IInStream, IInUnsafePromise } from "pareto-api"
 
-import { assertUnreachable } from "./genericFunctions"
-
 import { ISafePromise } from "./promises/ISafePromise"
 import { IUnsafePromise } from "./promises/IUnsafePromise"
 import { SafePromise } from "./promises/SafePromise"
@@ -12,6 +10,9 @@ import { IStream } from "./streams/IStream"
 import { KeyValueStream } from "./streams/KeyValueStream"
 import { Stream } from "./streams/Stream"
 
+function assertUnreachable<RT>(_x: never): RT {
+    throw new Error("unreachable")
+}
 
 // import { ISafeResource } from "./resources/ISafeResource"
 // import { IUnsafeOnCloseResource } from "./resources/IUnsafeOnCloseResource"

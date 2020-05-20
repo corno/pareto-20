@@ -42,7 +42,3 @@ export function onBoolean<ResultType>(value: boolean, onFalse: () => ResultType,
         return onFalse()
     }
 }
-
-export function assertUnreachable(_never: never) {
-    throw new Error("Didn't expect to get here")
-}
