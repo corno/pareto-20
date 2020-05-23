@@ -10,6 +10,8 @@ export * from "./dictionaries/SafeMutableDictionary"
 export * from "./dictionaries/StaticLookup"
 export * from "./dictionaries/UnsafeMutableDictionary"
 
+export * from "./promises/mergeArrayOfSafePromises"
+export * from "./promises/mergeArrayOfUnsafePromises"
 export * from "./promises/ISafePromise"
 export * from "./promises/IUnsafePromise"
 export * from "./promises/SafePromise"
