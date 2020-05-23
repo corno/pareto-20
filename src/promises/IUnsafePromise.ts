@@ -1,7 +1,7 @@
-import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { ISafePromise } from "./ISafePromise"
 
-export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<ResultType, ErrorType> {
+export interface IUnsafePromise<ResultType, ErrorType> extends api.IUnsafePromise<ResultType, ErrorType> {
     /**
      * change the success state
      * the callback should return a safe(!) promise
@@ -10,7 +10,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onSuccess
      */
     mapResult<NewResultType>(
-        onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
+        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
     ): IUnsafePromise<NewResultType, ErrorType>
     /**
      * change the success state
@@ -29,7 +29,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onError
      */
     mapError<NewErrorType>(
-        onError: (error: ErrorType) => IInSafePromise<NewErrorType>
+        onError: (error: ErrorType) => api.ISafePromise<NewErrorType>
     ): IUnsafePromise<ResultType, NewErrorType>
     /**
      * change the error state
@@ -47,7 +47,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onSuccess
      */
     try<NewResultType>(
-        onSuccess: (result: ResultType) => IInUnsafePromise<NewResultType, ErrorType>
+        onSuccess: (result: ResultType) => api.IUnsafePromise<NewResultType, ErrorType>
     ): IUnsafePromise<NewResultType, ErrorType>
     /**
      * try to catch the error. If it is successful, the resulting promise will be in the success
@@ -56,7 +56,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onError
      */
     tryToCatch<NewErrorType>(
-        onError: (error: ErrorType) => IInUnsafePromise<ResultType, NewErrorType>
+        onError: (error: ErrorType) => api.IUnsafePromise<ResultType, NewErrorType>
     ): IUnsafePromise<ResultType, NewErrorType>
     /**
      * the error state becomes the success state and the success state becomes the error state
@@ -74,8 +74,8 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onSuccess
      */
     rework<NewResultType, NewErrorType>(
-        onError: (error: ErrorType) => IInUnsafePromise<NewResultType, NewErrorType>,
-        onSuccess: (result: ResultType) => IInUnsafePromise<NewResultType, NewErrorType>
+        onError: (error: ErrorType) => api.IUnsafePromise<NewResultType, NewErrorType>,
+        onSuccess: (result: ResultType) => api.IUnsafePromise<NewResultType, NewErrorType>
     ): IUnsafePromise<NewResultType, NewErrorType>
     /**
      * catch the error and thus convert the promise into a safe promise of the same type
@@ -91,8 +91,8 @@ export interface IUnsafePromise<ResultType, ErrorType> extends IInUnsafePromise<
      * @param onSuccess
      */
     reworkAndCatch<NewResultType>(
-        onError: (error: ErrorType) => IInSafePromise<NewResultType>,
-        onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
+        onError: (error: ErrorType) => api.ISafePromise<NewResultType>,
+        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
     ): ISafePromise<NewResultType>
     /**
      * convert this unsafe promise to the JavaScript native Promise

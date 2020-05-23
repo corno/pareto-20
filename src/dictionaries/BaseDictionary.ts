@@ -1,7 +1,4 @@
-import {
-    IInSafeLookup,
-    IInSafePromise,
-} from "pareto-api"
+import * as api from "pareto-api"
 import { SafePromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { KeyValueStream } from "../streams/KeyValueStream"
@@ -31,10 +28,35 @@ export class BaseDictionary<StoredData> {
     public toKeysStream(): Stream<string> {
         return new Stream<string>((_limiter, onData, onEnd) => {
             //FIX implement limiter and abort
-            Object.keys(this.implementation).forEach(key => onData(key, () => {
-                //
-            }))
-            onEnd(false)
+            const keys = Object.keys(this.implementation)
+            let index = 0
+            function processNext() {
+                if (index < keys.length) {
+                    const key = keys[index]
+                    const result = onData(key)
+                    function handleResult(abort: boolean) {
+                        if (abort) {
+                            onEnd(true)
+                        } else {
+                            processNext()
+                        }
+                    }
+                    if (typeof result === "boolean") {
+                        handleResult(result)
+                    } else {
+                        result.handleSafePromise(promiseResult => {
+                            handleResult(promiseResult)
+                        })
+                    }
+                    index += 1
+                    processNext()
+                } else {
+                    onEnd(false)
+                }
+
+            }
+            processNext()
+            index += 1
         })
     }
     public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
@@ -52,7 +74,7 @@ export class BaseDictionary<StoredData> {
         }
     }
     public match<SupportType, TargetType, NewErrorType>(
-        lookup: IInSafeLookup<SupportType>,
+        lookup: api.ISafeLookup<SupportType>,
         resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
         missingEntriesErrorCreator: (errors: BaseDictionary<StoredData>) => NewErrorType
     ): UnsafePromise<BaseDictionary<TargetType>, NewErrorType> {
@@ -81,7 +103,7 @@ export class BaseDictionary<StoredData> {
             }
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => IInSafePromise<ResultType>): SafePromise<ResultType> {
+    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.ISafePromise<ResultType>): SafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue

@@ -1,15 +1,18 @@
-import { IInStream, IInUnsafePromise, StreamLimiter } from "pareto-api"
+import * as api from "pareto-api"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { IStream } from "./IStream"
 import { StaticStream } from "./StaticStream"
 import { Stream } from "./Stream"
+import { wrap } from "../wrap"
+import { result } from "../promises/SafePromise"
 
 export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateErrorType, ErrorType>(
-    stream: IInStream<DataType>,
-    limiter: null | StreamLimiter,
-    promisify: (entry: DataType) => IInUnsafePromise<TargetType, IntermediateErrorType>,
-    createError: (aborted: boolean, errors: Stream<IntermediateErrorType>) => ErrorType
+    stream: api.IStream<DataType>,
+    limiter: null | api.StreamLimiter,
+    promisify: (entry: DataType) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
+    createError: (aborted: boolean, errors: Stream<IntermediateErrorType>) => ErrorType,
+    abortOnError: boolean,
 ): IUnsafePromise<IStream<TargetType>, ErrorType> {
     return new UnsafePromise<IStream<TargetType>, ErrorType>((onError, onSuccess) => {
         let hasErrors = false
@@ -18,13 +21,17 @@ export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateEr
         stream.processStream(
             limiter,
             data => {
-                promisify(data).handleUnsafePromise(
+                return wrap.UnsafePromise(promisify(
+                    data
+                )).reworkAndCatch(
                     error => {
                         hasErrors = true
                         errors.push(error)
+                        return result(abortOnError)
                     },
-                    result => {
-                        results.push(result)
+                    theResult => {
+                        results.push(theResult)
+                        return result(false)
                     }
                 )
             },

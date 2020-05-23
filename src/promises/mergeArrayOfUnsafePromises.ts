@@ -1,10 +1,10 @@
-import { IInUnsafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { IUnsafePromise } from "./IUnsafePromise"
 import { UnsafePromise } from "./UnsafePromise"
 
 
 export function mergeArrayOfUnsafePromises<ResultType, ErrorType>(
-    array: IInUnsafePromise<ResultType, ErrorType>[]
+    array: api.IUnsafePromise<ResultType, ErrorType>[]
 ): IUnsafePromise<ResultType[], ErrorType[]> {
     let isExecuted = false
     function execute(onErrors: (errors: ErrorType[]) => void, onSuccess: (results: ResultType[]) => void) {

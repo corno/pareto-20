@@ -1,4 +1,4 @@
-import { IInKeyValueStream, IInSafePromise, IInStream, IInUnsafePromise } from "pareto-api"
+import * as api from "pareto-api"
 
 import { ISafePromise } from "./promises/ISafePromise"
 import { IUnsafePromise } from "./promises/IUnsafePromise"
@@ -29,18 +29,18 @@ export type OnKeyConflict =
     ["abort"]
 
 export const wrap = {
-    KeyValueStream: <DataType>(stream: IInKeyValueStream<DataType>, onKeyConflict: OnKeyConflict): IKeyValueStream<DataType> => {
+    KeyValueStream: <DataType>(stream: api.IKeyValueStream<DataType>, onKeyConflict: OnKeyConflict): IKeyValueStream<DataType> => {
         switch (onKeyConflict[0]) {
             case "abort": {
                 const keys: { [key: string]: null } = {}
                 return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
                     stream.processStream(
                         limiter,
-                        (data, abort) => {
+                        data => {
                             if (keys[data.key] !== undefined) {
                                 throw new Error("keyconflict: " + data.key)
                             }
-                            onData(data, abort)
+                            return onData(data)
                         },
                         onEnd
                     )
@@ -56,12 +56,12 @@ export const wrap = {
                 throw new Error("UNREACHABLE")
         }
     },
-    SafePromise: <SourceResultType>(promise: IInSafePromise<SourceResultType>): ISafePromise<SourceResultType> => {
+    SafePromise: <SourceResultType>(promise: api.ISafePromise<SourceResultType>): ISafePromise<SourceResultType> => {
         return new SafePromise<SourceResultType>(onResult => {
             promise.handleSafePromise(onResult)
         })
     },
-    UnsafePromise: <SourceResultType, SourceErrorType>(promise: IInUnsafePromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
+    UnsafePromise: <SourceResultType, SourceErrorType>(promise: api.IUnsafePromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
         return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {
             promise.handleUnsafePromise(onError, onSucces)
         })
@@ -102,7 +102,7 @@ export const wrap = {
     //         })
     //     })
     // },
-    Stream: <DataType>(stream: IInStream<DataType>): IStream<DataType> => {
+    Stream: <DataType>(stream: api.IStream<DataType>): IStream<DataType> => {
         return new Stream<DataType>((limiter, onData, onEnd) => {
             stream.processStream(limiter, onData, onEnd)
         })

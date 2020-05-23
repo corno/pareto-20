@@ -1,4 +1,4 @@
-import { IInSafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { ISafePromise, SafeCallerFunction } from "../promises/ISafePromise"
 import { SafePromise } from "../promises/SafePromise"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
@@ -22,8 +22,8 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
     }
 
     public with<ResultType>(
-        onOpenError: (error: OpenError) => IInSafePromise<ResultType>,
-        onOpenSuccess: (openReource: ResourceType) => IInSafePromise<ResultType>
+        onOpenError: (error: OpenError) => api.ISafePromise<ResultType>,
+        onOpenSuccess: (openReource: ResourceType) => api.ISafePromise<ResultType>
     ): ISafePromise<ResultType> {
         const newFunc: SafeCallerFunction<ResultType> = onResult => {
             this.openUnsafeOpenableResource(
@@ -38,7 +38,7 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
         }
         return new SafePromise<ResultType>(newFunc)
     }
-    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => IInSafePromise<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
+    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => api.ISafePromise<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {
             this.openFunction(
                 error => errorConverter(error).handleSafePromise(res => onOpenError(res)),
@@ -46,7 +46,7 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
             )
         })
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => IInSafePromise<NewType>): IUnsafeOnOpenResource<NewType, OpenError> {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.ISafePromise<NewType>): IUnsafeOnOpenResource<NewType, OpenError> {
         return new UnsafeOnOpenResource<NewType, OpenError>((onOpenError, onSuccess) => {
             this.openFunction(
                 error => onOpenError(error),

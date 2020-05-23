@@ -1,15 +1,12 @@
-import {
-    KeyValuePair,
-    StreamLimiter,
-} from "pareto-api"
+import * as api from "pareto-api"
 import { ProcessKeyValueStreamFunction } from "./KeyValueStream"
 
 export function streamifyDictionary<ElementType>(dictionary: { [key: string]: ElementType }): ProcessKeyValueStreamFunction<ElementType> {
     const keys = Object.keys(dictionary)
     return (
-        limiter: null | StreamLimiter,
+        limiter: null | api.StreamLimiter,
         onData: (
-            data: KeyValuePair<ElementType>,
+            data: api.KeyValuePair<ElementType>,
             abort: () => void
         ) => void,
         onEnd: (aborted: boolean) => void

@@ -1,7 +1,7 @@
 /* eslint
     "@typescript-eslint/no-empty-interface": off
 */
-import { IInUnsafeOpenedResource } from "pareto-api"
+import * as api from "pareto-api"
 
-export interface IUnsafeOpenedResource<ResourceType, CloseError> extends IInUnsafeOpenedResource<ResourceType, CloseError> {
+export interface IUnsafeOpenedResource<ResourceType, CloseError> extends api.IUnsafeOpenedResource<ResourceType, CloseError> {
 }

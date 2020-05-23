@@ -1,6 +1,6 @@
 
 import { ProcessStreamFunction } from "./Stream"
-import { StreamLimiter } from "pareto-api"
+import * as api from "pareto-api"
 
 /**
  * this function can be used as the argument to a stream: 'new Stream(streamifyArray(["x"]))'
@@ -9,7 +9,7 @@ import { StreamLimiter } from "pareto-api"
  */
 export function streamifyArray<ElementType>(array: ElementType[]): ProcessStreamFunction<ElementType> {
     return (
-        limiter: null | StreamLimiter,
+        limiter: null | api.StreamLimiter,
         onData: (data: ElementType, abort: () => void) => void,
         onEnd: (aborted: boolean) => void
     ): void => {

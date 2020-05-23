@@ -1,9 +1,9 @@
-import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { ISafePromise, SafeCallerFunction } from "./ISafePromise"
 import { IUnsafePromise } from "./IUnsafePromise"
 import { UnsafePromise } from "./UnsafePromise"
 
-export class SafePromise<T> implements IInSafePromise<T> {
+export class SafePromise<T> implements api.ISafePromise<T> {
     private readonly callerFunction: SafeCallerFunction<T>
     private isCalled = false
     constructor(callerFunction: SafeCallerFunction<T>) {
@@ -59,7 +59,7 @@ export class SafePromise<T> implements IInSafePromise<T> {
      * if this fails the new unsafe promise will be in an error state
      * @param callback
      */
-    public try<ResultType, ErrorType>(callback: (result: T) => IInUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
+    public try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
         return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
             this.handleSafePromise(res => {
                 callback(res).handleUnsafePromise(onError, onSuccess)

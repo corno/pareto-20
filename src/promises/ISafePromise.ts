@@ -1,16 +1,16 @@
-import { IInSafePromise, IInUnsafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { IUnsafePromise } from "./IUnsafePromise"
 
 export type SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => void
 
-export interface ISafePromise<T> extends IInSafePromise<T> {
+export interface ISafePromise<T> extends api.ISafePromise<T> {
     /**
      * change the result state
      * the callback should return a (safe) promise
      * if you do not want to return a promise, use 'mapResultRaw'
      * @param onResult
      */
-    mapResult<NewType>(onResult: (result: T) => ISafePromise<NewType>): ISafePromise<NewType>
+    mapResult<NewType>(onResult: (result: T) => api.ISafePromise<NewType>): ISafePromise<NewType>
     /**
      * change the success state
      * the callback does not have to and should not return a promise
@@ -23,7 +23,7 @@ export interface ISafePromise<T> extends IInSafePromise<T> {
      * if this fails the new unsafe promise will be in an error state
      * @param callback
      */
-    try<ResultType, ErrorType>(callback: (result: T) => IInUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType>
+    try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType>
     /**
      * convert this safe promise to the JavaScript native Promise
      * only do this to interface with code that requires native Promises

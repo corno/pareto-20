@@ -1,4 +1,4 @@
-import { IInSafePromise } from "pareto-api"
+import * as api from "pareto-api"
 import { ISafeResource } from "./ISafeResource"
 import { SafeFunction, SafeOpenedResource } from "./SafeOpenedResource"
 
@@ -14,7 +14,7 @@ export class SafeResource<ResourceType> implements ISafeResource<ResourceType> {
             }
         )
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => IInSafePromise<NewType>): ISafeResource<NewType> {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.ISafePromise<NewType>): ISafeResource<NewType> {
         return new SafeResource<NewType>(onSuccess => {
             this.openFunction(
                 (resource, closer) => resourceConverter(resource).handleSafePromise(res => onSuccess(res, closer))
