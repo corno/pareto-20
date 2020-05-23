@@ -7,7 +7,7 @@ export class UnsafeOpenedResource<ResourceType, CloseError> implements IUnsafeOp
         this.resource = resource
         this.closer = closer
     }
-    public closeUnsafeOpenedResource(onCloseError: (error: CloseError) => void) {
+    public closeUnsafeOpenedResource(onCloseError: (error: CloseError) => void): void {
         this.closer(onCloseError)
     }
 }

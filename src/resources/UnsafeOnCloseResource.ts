@@ -9,15 +9,19 @@ export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeO
     constructor(openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>) {
         this.openFunction = openFunction
     }
-    public openSafeOpenableResource(onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void) {
+    public openSafeOpenableResource(
+        onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void
+    ): void {
         this.openFunction(
             (resource: ResourceType, closer: (onError: (error: CloseError) => void) => void) => {
                 onOpened(new UnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
             }
         )
     }
-    public mapCloseError<NewErrorType>(errorConverter: (closeError: CloseError) => NewErrorType) {
-        return new UnsafeOnCloseResource<ResourceType, NewErrorType>(onOpened => {
+    public mapCloseError<NewErrorType>(
+        errorConverter: (closeError: CloseError) => NewErrorType
+    ): UnsafeOnCloseResource<ResourceType, NewErrorType> {
+        return new UnsafeOnCloseResource(onOpened => {
             this.openFunction(
                 (resource, closer) => onOpened(resource, errorCallback => closer(oldCloseError => errorCallback(errorConverter(oldCloseError))))
             )
@@ -44,6 +48,8 @@ export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeO
     }
 }
 
-export function wrapUnsafeOnCloseResource<ResourceType, CloseError>(openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>) {
-    return new UnsafeOnCloseResource<ResourceType, CloseError>(openFunction)
+export function wrapUnsafeOnCloseResource<ResourceType, CloseError>(
+    openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>
+): UnsafeOnCloseResource<ResourceType, CloseError> {
+    return new UnsafeOnCloseResource(openFunction)
 }

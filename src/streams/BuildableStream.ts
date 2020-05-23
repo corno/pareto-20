@@ -13,7 +13,7 @@ export class BuildableStream<DataType> extends Stream<DataType> implements IStre
         super(streamifyArray(array))
         this.array = array
     }
-    public push(element: DataType) {
+    public push(element: DataType): void {
         this.array.push(element)
     }
 }

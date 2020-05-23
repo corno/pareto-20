@@ -1,5 +1,5 @@
 import { IUnsafeResource } from "./IUnsafeResource"
-import { UnsafeOnOpenResource} from "./UnsafeOnOpenResource"
+import { UnsafeOnOpenResource } from "./UnsafeOnOpenResource"
 import { UnsafeOpenedResource } from "./UnsafeOpenedResource"
 
 export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeResource<ResourceType, OpenError, CloseError> {
@@ -7,7 +7,10 @@ export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUns
     constructor(openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>) {
         this.openFunction = openFunction
     }
-    public openUnsafeOpenableResource(onError: (openError: OpenError) => void, onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void) {
+    public openUnsafeOpenableResource(
+        onError: (openError: OpenError) => void,
+        onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void
+    ): void {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: (onCloseError: (closeError: CloseError) => void) => void) => {
@@ -16,8 +19,8 @@ export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUns
         )
     }
 
-    public suppressCloseError(closeErrorHandler: (error: CloseError) => void) {
-        return new UnsafeOnOpenResource<ResourceType, OpenError>((onOpenError, onSuccess) => {
+    public suppressCloseError(closeErrorHandler: (error: CloseError) => void): UnsafeOnOpenResource<ResourceType, OpenError> {
+        return new UnsafeOnOpenResource((onOpenError, onSuccess) => {
             this.openUnsafeOpenableResource(
                 onOpenError,
                 success => onSuccess(
@@ -39,6 +42,8 @@ export type UnsafeFunction<ResultType, OpenError, CloseError> = (
     ) => void
 ) => void
 
-export function wrapUnsafeResource<ResourceType, OpenError, CloseError>(openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>) {
-    return new UnsafeResource<ResourceType, OpenError, CloseError>(openFunction)
+export function wrapUnsafeResource<ResourceType, OpenError, CloseError>(
+    openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>
+): UnsafeResource<ResourceType, OpenError, CloseError> {
+    return new UnsafeResource(openFunction)
 }

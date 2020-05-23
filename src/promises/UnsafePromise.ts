@@ -39,8 +39,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      */
     public mapResult<NewResultType>(
         onSuccess: (result: ResultType) => IInSafePromise<NewResultType>
-    ) {
-        return new UnsafePromise<NewResultType, ErrorType>((newOnError, newOnSuccess) => {
+    ): UnsafePromise<NewResultType, ErrorType> {
+        return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
                     newOnError(err)
@@ -61,7 +61,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      */
     public mapResultRaw<NewResultType>(
         onSuccess: (result: ResultType) => NewResultType
-    ) {
+    ): UnsafePromise<NewResultType, ErrorType> {
         return this.mapResult(data => result(onSuccess(data)))
     }
     /**
@@ -73,8 +73,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      */
     public mapError<NewErrorType>(
         onError: (error: ErrorType) => IInSafePromise<NewErrorType>,
-    ) {
-        return new UnsafePromise<ResultType, NewErrorType>((newOnError, newOnSuccess) => {
+    ): UnsafePromise<ResultType, NewErrorType> {
+        return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
                     onError(err).handleSafePromise(res => newOnError(res))
@@ -91,7 +91,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      * if you want to return a promise, use 'mapError'
      * @param onError
      */
-    public mapErrorRaw<NewErrorType>(onError: (error: ErrorType) => NewErrorType) {
+    public mapErrorRaw<NewErrorType>(onError: (error: ErrorType) => NewErrorType): UnsafePromise<ResultType, NewErrorType> {
         return this.mapError(err => result(onError(err)))
     }
     /**
@@ -102,8 +102,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      */
     public try<NewResultType>(
         onSuccess: (result: ResultType) => IInUnsafePromise<NewResultType, ErrorType>
-    ) {
-        return new UnsafePromise<NewResultType, ErrorType>((newOnError, newOnSuccess) => {
+    ): UnsafePromise<NewResultType, ErrorType> {
+        return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
                     newOnError(err)
@@ -122,8 +122,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      */
     public tryToCatch<NewErrorType>(
         onError: (error: ErrorType) => IInUnsafePromise<ResultType, NewErrorType>,
-    ) {
-        return new UnsafePromise<ResultType, NewErrorType>((newOnError, newOnSuccess) => {
+    ): UnsafePromise<ResultType, NewErrorType> {
+        return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
                     onError(err).handleUnsafePromise(newOnError, newOnSuccess)
@@ -139,7 +139,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      * this can be useful when you need an existing function to fail
      * for example; use fs.access to validate that a file does not exist
      */
-    public invert() {
+    public invert(): UnsafePromise<ErrorType, ResultType> {
         return new UnsafePromise<ErrorType, ResultType>((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
@@ -160,8 +160,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
     public rework<NewResultType, NewErrorType>(
         onError: (error: ErrorType) => IInUnsafePromise<NewResultType, NewErrorType>,
         onSuccess: (result: ResultType) => IInUnsafePromise<NewResultType, NewErrorType>
-    ) {
-        return new UnsafePromise<NewResultType, NewErrorType>((newOnError, newOnSuccess) => {
+    ): UnsafePromise<NewResultType, NewErrorType> {
+        return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
                     onError(err).handleUnsafePromise(newOnError, newOnSuccess)
@@ -211,8 +211,8 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
             )
         })
     }
-    public convertToNativePromise() {
-        return new Promise<ResultType>((resolve, reject) => {
+    public convertToNativePromise(): Promise<ResultType> {
+        return new Promise((resolve, reject) => {
             this.handleUnsafePromise(
                 errorData => {
                     reject(errorData)

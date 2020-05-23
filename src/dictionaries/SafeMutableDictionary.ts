@@ -38,8 +38,8 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
     }
     public derive<NewOpenData>(
         opener: (storedData: StoredData, entryName: string) => NewOpenData,
-    ) {
-        return new IntSafeMutableDictionary<StoredData, CreateData, NewOpenData>(
+    ): IntSafeMutableDictionary<StoredData, CreateData, NewOpenData> {
+        return new IntSafeMutableDictionary(
             this.implementation,
             this.creator,
             opener,

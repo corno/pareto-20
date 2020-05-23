@@ -37,8 +37,8 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
     }
     public derive<NewOpenData>(
         opener: (storedData: StoredData, entryName: string) => NewOpenData,
-    ) {
-        return new IntUnsafeMutableDictionary<StoredData, CreateData, NewOpenData, CustomErrorType>(
+    ):IntUnsafeMutableDictionary<StoredData, CreateData, NewOpenData, CustomErrorType> {
+        return new IntUnsafeMutableDictionary(
             this.implementation,
             this.creator,
             opener,

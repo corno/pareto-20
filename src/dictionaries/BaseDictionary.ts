@@ -8,6 +8,7 @@ import { KeyValueStream } from "../streams/KeyValueStream"
 import { Stream } from "../streams/Stream"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { ILookup } from "./ILookup"
+import { IKeyValueStream } from "../streams/IKeyValueStream"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
@@ -22,12 +23,12 @@ export class BaseDictionary<StoredData> {
     ) {
         this.implementation = dictionary
     }
-    public toStream<StreamType>(callback: (entry: StoredData, entryName: string) => StreamType) {
+    public toStream<StreamType>(callback: (entry: StoredData, entryName: string) => StreamType): IKeyValueStream<StreamType> {
         return new KeyValueStream<StoredData>(
             streamifyDictionary(this.implementation)
         ).mapRaw<StreamType>((entry, entryName) => callback(entry, entryName))
     }
-    public toKeysStream() {
+    public toKeysStream(): Stream<string> {
         return new Stream<string>((_limiter, onData, onEnd) => {
             //FIX implement limiter and abort
             Object.keys(this.implementation).forEach(key => onData(key, () => {
@@ -38,7 +39,7 @@ export class BaseDictionary<StoredData> {
     }
     public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
         return {
-            getEntry: (entryName: string) => {
+            getEntry: (entryName: string): UnsafePromise<NewType, null> => {
                 return new UnsafePromise<NewType, null>((onError, onSuccess) => {
                     const entry = this.implementation[entryName]
                     if (entry === undefined) {
@@ -54,7 +55,7 @@ export class BaseDictionary<StoredData> {
         lookup: IInSafeLookup<SupportType>,
         resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
         missingEntriesErrorCreator: (errors: BaseDictionary<StoredData>) => NewErrorType
-    ) {
+    ): UnsafePromise<BaseDictionary<TargetType>, NewErrorType> {
         return new UnsafePromise<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
             const resultDictionary: { [key: string]: TargetType } = {}
             const errorDictionary: { [key: string]: StoredData } = {}
@@ -80,7 +81,7 @@ export class BaseDictionary<StoredData> {
             }
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => IInSafePromise<ResultType>) {
+    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => IInSafePromise<ResultType>): SafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue

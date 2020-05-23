@@ -3,17 +3,22 @@ import { ISafePromise } from "../promises/ISafePromise"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { SafePromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
-import { FilterResult, IStream, ProcessStream } from "./IStream"
+import { FilterResult, IStream } from "./IStream"
 import { streamifyArray} from "./streamifyArray"
 
+/**
+ * a function that can process a stream by implementing handlers for 'onData' and 'onEnd'
+ */
+export type ProcessStreamFunction<DataType> = (limiter: null | StreamLimiter, onData: (data: DataType, abort: () => void) => void, onEnd: (aborted: boolean) => void) => void
+
 export class Stream<DataType> implements IStream<DataType> {
-    public readonly processStream: ProcessStream<DataType>
+    public readonly processStream: ProcessStreamFunction<DataType>
     constructor(
-        streamGetter: ProcessStream<DataType>,
+        processStreamFunction: ProcessStreamFunction<DataType>,
     ) {
-        this.processStream = streamGetter
+        this.processStream = processStreamFunction
     }
-    public toArray(limiter: null | StreamLimiter, onAborted: (() => void) | null) {
+    public toArray(limiter: null | StreamLimiter, onAborted: (() => void) | null): DataType[] {
         const array: DataType[] = []
         this.processStream(limiter, data => array.push(data), aborted => { if (aborted && onAborted !== null) { onAborted() } })
         return array

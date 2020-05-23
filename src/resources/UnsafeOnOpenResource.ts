@@ -9,7 +9,10 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
     constructor(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
         this.openFunction = openFunction
     }
-    public openUnsafeOpenableResource(onError: (openError: OpenError) => void, onOpened: (openedResource: SafeOpenedResource<ResourceType>) => void) {
+    public openUnsafeOpenableResource(
+        onError: (openError: OpenError) => void,
+        onOpened: (openedResource: SafeOpenedResource<ResourceType>) => void
+    ): void {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: () => void) => {
@@ -61,6 +64,8 @@ export type UnsafeOnOpenFunction<ResultType, OpenError> = (
     ) => void
 ) => void
 
-export function wrapUnsafeOnOpenResource<ResourceType, OpenError>(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
-    return new UnsafeOnOpenResource<ResourceType, OpenError>(openFunction)
+export function wrapUnsafeOnOpenResource<ResourceType, OpenError>(
+    openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
+): UnsafeOnOpenResource<ResourceType, OpenError> {
+    return new UnsafeOnOpenResource(openFunction)
 }

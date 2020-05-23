@@ -12,7 +12,7 @@ export class BuildableKeyValueStream<DataType> extends KeyValueStream<DataType> 
         super(streamifyDictionary(dictionary))
         this.dictionary = dictionary
     }
-    public set(key: string, element: DataType) {
+    public set(key: string, element: DataType): void {
         this.dictionary[key] = element
     }
     // public get(key: string, initializer: () => DataType) {

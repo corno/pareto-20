@@ -9,16 +9,16 @@ import { streamifyDictionary } from "./streamifyDictionary"
 
 type OnData<DataType> = (data: KeyValuePair<DataType>, abort: () => void) => void
 
-export type KeyValueStreamGetter<DataType> = (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+export type ProcessKeyValueStreamFunction<DataType> = (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
 
 export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
-    public readonly processStream: (limiter: null | StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+    public readonly processStream: ProcessKeyValueStreamFunction<DataType>
     constructor(
-        streamGetter: KeyValueStreamGetter<DataType>,
+        processStreamFunction: ProcessKeyValueStreamFunction<DataType>,
     ) {
-        this.processStream = streamGetter
+        this.processStream = processStreamFunction
     }
-    public toKeysStream() {
+    public toKeysStream(): Stream<string> {
         return new Stream<string>((limiter, onData, onEnd) => {
             this.processStream(limiter, (data, abort) => onData(data.key, abort), onEnd)
         })

@@ -7,10 +7,10 @@ import { ILookup } from "./ILookup"
 // tslint:disable-next-line: max-classes-per-file
 export class BuildableLookup<DataType> implements ILookup<DataType> {
     private readonly dictionary: { [key: string]: DataType } = {}
-    public set(key: string, element: DataType) {
+    public set(key: string, element: DataType): void {
         this.dictionary[key] = element
     }
-    public get(key: string, initializer: () => DataType) {
+    public get(key: string, initializer: () => DataType): DataType {
         let entry = this.dictionary[key]
         if (entry === undefined) {
             entry = initializer()

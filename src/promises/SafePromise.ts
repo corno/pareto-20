@@ -67,7 +67,7 @@ export class SafePromise<T> implements IInSafePromise<T> {
 
         })
     }
-    public convertToNativePromise() {
+    public convertToNativePromise(): Promise<T> {
         return new Promise<T>(resolve => {
             this.handleSafePromise(
                 resultData => {
