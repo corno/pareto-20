@@ -7,14 +7,14 @@ import { Stream } from "./Stream"
 import { wrap } from "../wrap"
 import { result } from "../promises/SafePromise"
 
-export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateErrorType, ErrorType>(
-    stream: api.IStream<DataType>,
+export function mergeStreamOfUnsafePromises<DataType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+    stream: api.IStream<DataType, EndDataType>,
     limiter: null | api.StreamLimiter,
     promisify: (entry: DataType) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-    createError: (aborted: boolean, errors: Stream<IntermediateErrorType>) => ErrorType,
+    createError: (aborted: boolean, errors: Stream<IntermediateErrorType, EndDataType>) => ErrorType,
     abortOnError: boolean,
-): IUnsafePromise<IStream<TargetType>, ErrorType> {
-    return new UnsafePromise<IStream<TargetType>, ErrorType>((onError, onSuccess) => {
+): IUnsafePromise<IStream<TargetType, EndDataType>, ErrorType> {
+    return new UnsafePromise<IStream<TargetType, EndDataType>, ErrorType>((onError, onSuccess) => {
         let hasErrors = false
         const errors: IntermediateErrorType[] = []
         const results: TargetType[] = []
@@ -35,11 +35,11 @@ export function mergeStreamOfUnsafePromises<DataType, TargetType, IntermediateEr
                     }
                 )
             },
-            aborted => {
+            (aborted, endData) => {
                 if (hasErrors) {
-                    onError(createError(aborted, new StaticStream(errors)))
+                    onError(createError(aborted, new StaticStream(errors, endData)))
                 } else {
-                    onSuccess(new StaticStream(results))
+                    onSuccess(new StaticStream(results, endData))
                 }
             }
         )

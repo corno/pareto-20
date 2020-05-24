@@ -6,9 +6,12 @@ import { buildStream } from "../src/streams/buildStream"
 describe("buildStream", () => {
     it("write behaviour", () => {
 
-        buildStream(_builder => {
-
-        })
+        buildStream(
+            _builder => {
+                //
+            },
+            null,
+        )
         //assert.deepEqual(out, ["A"])
     })
 })

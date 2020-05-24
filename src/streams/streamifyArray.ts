@@ -7,29 +7,38 @@ import * as api from "pareto-api"
  * @param array
  * @returns a function that processes the data from the stream
  */
-export function streamifyArray<ElementType>(array: ElementType[]): ProcessStreamFunction<ElementType> {
+export function streamifyArray<ElementType, EndDataType>(
+    array: ElementType[],
+    endData: EndDataType,
+    ): ProcessStreamFunction<ElementType, EndDataType> {
     return (
         limiter: null | api.StreamLimiter,
-        onData: (data: ElementType, abort: () => void) => void,
-        onEnd: (aborted: boolean) => void
+        onData: (data: ElementType) => api.ISafePromise<boolean> | boolean,
+        onEnd: (aborted: boolean, endData: EndDataType) => void
     ): void => {
         function pushData(theArray: ElementType[], limited: boolean) {
             let abort = false
             theArray.forEach(element => {
                 if (!abort) {
-                    onData(
-                        element,
-                        () => {
+                    const onDataResult = onData(element)
+                    if (typeof onDataResult === "boolean") {
+                        if (onDataResult === true) {
                             abort = true
                         }
-                    )
+                    } else {
+                        onDataResult.handleSafePromise(abortRequested => {
+                            if (abortRequested) {
+                                abort = true
+                            }
+                        })
+                    }
                 }
             })
-            onEnd(limited || abort)
+            onEnd(limited || abort, endData)
         }
         if (limiter !== null && limiter.maximum < array.length) {
             if (limiter.abortEarly) {
-                onEnd(true)
+                onEnd(true, endData)
             } else {
                 pushData(array.slice(0, limiter.maximum), true)
             }

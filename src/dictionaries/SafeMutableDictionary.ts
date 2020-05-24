@@ -59,9 +59,11 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
         this.deleter(entry)
         return success(null)
     }
-    public getKeys(): SafePromise<Stream<string>> {
+    public getKeys<EndDataType>(
+        endData: EndDataType,
+    ): SafePromise<Stream<string, EndDataType>> {
         return result(
-            new Stream<string>(streamifyArray(Object.keys(this.implementation)))
+            new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData))
         )
     }
     public getEntry(entryName: string): IUnsafePromise<OpenData, api.SafeEntryDoesNotExistError> {

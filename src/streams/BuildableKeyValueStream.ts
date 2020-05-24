@@ -4,12 +4,14 @@ import { streamifyDictionary } from "./streamifyDictionary"
 /**
  * allows for building a key value stream by calling the 'set' method
  */
-export class BuildableKeyValueStream<DataType> extends KeyValueStream<DataType> {
+export class BuildableKeyValueStream<DataType, EndDataType> extends KeyValueStream<DataType, EndDataType> {
     private readonly dictionary: { [key: string]: DataType }
-    constructor() {
+    constructor(
+        endData: EndDataType,
+    ) {
         const dictionary: { [key: string]: DataType } = {}
 
-        super(streamifyDictionary(dictionary))
+        super(streamifyDictionary(dictionary, endData))
         this.dictionary = dictionary
     }
     public set(key: string, element: DataType): void {

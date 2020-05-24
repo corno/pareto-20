@@ -29,16 +29,19 @@ export type OnKeyConflict =
     ["abort"]
 
 export const wrap = {
-    KeyValueStream: <DataType>(stream: api.IKeyValueStream<DataType>, onKeyConflict: OnKeyConflict): IKeyValueStream<DataType> => {
+    KeyValueStream: <DataType, EndDataType>(
+        stream: api.IKeyValueStream<DataType, EndDataType>,
+        onKeyConflict: OnKeyConflict
+    ): IKeyValueStream<DataType, EndDataType> => {
         switch (onKeyConflict[0]) {
             case "abort": {
                 const keys: { [key: string]: null } = {}
-                return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
+                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
                     stream.processStream(
                         limiter,
                         data => {
                             if (keys[data.key] !== undefined) {
-                                throw new Error("keyconflict: " + data.key)
+                                throw new Error(`keyconflict: ${data.key}`)
                             }
                             return onData(data)
                         },
@@ -47,7 +50,7 @@ export const wrap = {
                 })
             }
             case "ignore": {
-                return new KeyValueStream<DataType>((limiter, onData, onEnd) => {
+                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
                     stream.processStream(limiter, onData, onEnd)
                 })
             }
@@ -102,8 +105,8 @@ export const wrap = {
     //         })
     //     })
     // },
-    Stream: <DataType>(stream: api.IStream<DataType>): IStream<DataType> => {
-        return new Stream<DataType>((limiter, onData, onEnd) => {
+    Stream: <DataType, EndDataType>(stream: api.IStream<DataType, EndDataType>): IStream<DataType, EndDataType> => {
+        return new Stream<DataType, EndDataType>((limiter, onData, onEnd) => {
             stream.processStream(limiter, onData, onEnd)
         })
     },

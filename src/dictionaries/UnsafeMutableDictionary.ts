@@ -65,9 +65,11 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         this.deleter(entry)
         return success(null)
     }
-    public getKeys(): IUnsafePromise<Stream<string>, CustomErrorType> {
+    public getKeys<EndDataType>(
+        endData: EndDataType,
+    ): IUnsafePromise<Stream<string, EndDataType>, CustomErrorType> {
         return success(
-            new Stream<string>(streamifyArray(Object.keys(this.implementation)))
+            new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData))
         )
     }
     public createEntry(entryName: string, createData: CreateData): IUnsafePromise<null, api.UnsafeEntryAlreadyExistsError<CustomErrorType>> {

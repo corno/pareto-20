@@ -10,12 +10,12 @@ import { wrap } from "../wrap"
 /**
  * a function that can process a stream by implementing handlers for 'onData' and 'onEnd'
  */
-export type ProcessStreamFunction<DataType> = (limiter: null | api.StreamLimiter, onData: api.OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+export type ProcessStreamFunction<DataType, EndDataType> = (limiter: null | api.StreamLimiter, onData: api.OnData<DataType>, onEnd: (aborted: boolean, data: EndDataType) => void) => void
 
-export class Stream<DataType> implements IStream<DataType> {
-    public readonly processStream: ProcessStreamFunction<DataType>
+export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataType> {
+    public readonly processStream: ProcessStreamFunction<DataType, EndDataType>
     constructor(
-        processStreamFunction: ProcessStreamFunction<DataType>,
+        processStreamFunction: ProcessStreamFunction<DataType, EndDataType>,
     ) {
         this.processStream = processStreamFunction
     }
@@ -34,8 +34,8 @@ export class Stream<DataType> implements IStream<DataType> {
         return array
     }
 
-    public map<NewDataType>(onData: (data: DataType) => api.ISafePromise<NewDataType>): IStream<NewDataType> {
-        return new Stream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    public map<NewDataType>(onData: (data: DataType) => api.ISafePromise<NewDataType>): IStream<NewDataType, EndDataType> {
+        return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -48,25 +48,25 @@ export class Stream<DataType> implements IStream<DataType> {
                         }
                     })
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, endData) => newOnEnd(aborted, endData)
             )
         })
     }
-    public mapRaw<NewDataType>(onData: (data: DataType) => NewDataType): IStream<NewDataType> {
-        return new Stream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    public mapRaw<NewDataType>(onData: (data: DataType) => NewDataType): IStream<NewDataType, EndDataType> {
+        return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
                     return newOnData(onData(data))
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, endData) => newOnEnd(aborted, endData)
             )
         })
     }
     public filter<NewDataType>(
         onData: (data: DataType) => api.ISafePromise<FilterResult<NewDataType>>,
-    ): IStream<NewDataType> {
-        return new Stream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    ): IStream<NewDataType, EndDataType> {
+        return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -86,7 +86,7 @@ export class Stream<DataType> implements IStream<DataType> {
                     })
 
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, endData) => newOnEnd(aborted, endData)
             )
         })
     }
@@ -110,9 +110,9 @@ export class Stream<DataType> implements IStream<DataType> {
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: null | api.StreamLimiter,
         promisify: (entry: DataType) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-        errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType>) => api.ISafePromise<TargetErrorType>
-    ): IUnsafePromise<IStream<TargetType>, TargetErrorType> {
-        return new UnsafePromise<IStream<TargetType>, TargetErrorType>((onError, onSuccess) => {
+        errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => api.ISafePromise<TargetErrorType>
+    ): IUnsafePromise<IStream<TargetType, EndDataType>, TargetErrorType> {
+        return new UnsafePromise<IStream<TargetType, EndDataType>, TargetErrorType>((onError, onSuccess) => {
             const results: TargetType[] = []
             const errors: IntermediateErrorType[] = []
             let hasErrors = false
@@ -131,13 +131,13 @@ export class Stream<DataType> implements IStream<DataType> {
                         }
                     )
                 },
-                aborted => {
+                (aborted, endData) => {
                     if (aborted || hasErrors) {
-                        errorHandler(aborted, new Stream(streamifyArray(errors))).handleSafePromise(theResult => {
+                        errorHandler(aborted, new Stream(streamifyArray(errors, endData))).handleSafePromise(theResult => {
                             onError(theResult)
                         })
                     } else {
-                        onSuccess(new Stream(streamifyArray(results)))
+                        onSuccess(new Stream(streamifyArray(results, endData)))
                     }
                 }
             )

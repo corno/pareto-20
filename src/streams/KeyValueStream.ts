@@ -12,30 +12,32 @@ import { FilterResult } from "./IStream"
 
 type OnData<DataType> = api.OnData<KeyValuePair<DataType>>
 
-export type ProcessKeyValueStreamFunction<DataType> = (limiter: null | api.StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean) => void) => void
+export type ProcessKeyValueStreamFunction<DataType, EndDataType> = (limiter: null | api.StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean, data: EndDataType) => void) => void
 
-export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
-    public readonly processStream: ProcessKeyValueStreamFunction<DataType>
+export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType, EndDataType> {
+    public readonly processStream: ProcessKeyValueStreamFunction<DataType, EndDataType>
     constructor(
-        processStreamFunction: ProcessKeyValueStreamFunction<DataType>,
+        processStreamFunction: ProcessKeyValueStreamFunction<DataType, EndDataType>,
     ) {
         this.processStream = processStreamFunction
     }
-    public toKeysStream(): Stream<string> {
-        return new Stream<string>((limiter, onData, onEnd) => {
+    public toKeysStream(): Stream<string, EndDataType> {
+        return new Stream<string, EndDataType>((limiter, onData, onEnd) => {
             this.processStream(
                 limiter,
                 data => {
                     return onData(data.key)
                 },
-                onEnd
+                (aborted, endData) => {
+                    onEnd(aborted, endData)
+                }
             )
         })
     }
 
 
-    public map<NewDataType>(onData: (data: DataType, key: string) => api.ISafePromise<NewDataType>): IKeyValueStream<NewDataType> {
-        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    public map<NewDataType>(onData: (data: DataType, key: string) => api.ISafePromise<NewDataType>): IKeyValueStream<NewDataType, EndDataType> {
+        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -50,12 +52,12 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                         return onDataResult(newResult)
                     })
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, data) => newOnEnd(aborted, data)
             )
         })
     }
-    public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType> {
-        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType, EndDataType> {
+        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -67,14 +69,14 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                     }
                     return onDataResult(newOnData({ key: data.key, value: onData(data.value, data.key) }))
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, data) => newOnEnd(aborted, data)
             )
         })
     }
     public filter<NewDataType>(
         onData: (data: DataType, key: string) => api.ISafePromise<FilterResult<NewDataType>>,
-    ): KeyValueStream<NewDataType> {
-        return new KeyValueStream<NewDataType>((newLimiter, newOnData, newOnEnd) => {
+    ): KeyValueStream<NewDataType, EndDataType> {
+        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -96,7 +98,7 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                         return result(false)
                     })
                 },
-                aborted => newOnEnd(aborted)
+                (aborted, endData) => newOnEnd(aborted, endData)
             )
         })
     }
@@ -120,9 +122,9 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: null | api.StreamLimiter,
         promisify: (entry: DataType, entryName: string) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType>) => api.ISafePromise<TargetErrorType>
-    ): IUnsafePromise<IKeyValueStream<TargetType>, TargetErrorType> {
-        return new UnsafePromise<IKeyValueStream<TargetType>, TargetErrorType>((onError, onSuccess) => {
+        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType, EndDataType>) => api.ISafePromise<TargetErrorType>
+    ): IUnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType> {
+        return new UnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType>((onError, onSuccess) => {
             const results: { [key: string]: TargetType } = {}
             const errors: { [key: string]: IntermediateErrorType } = {}
             let hasErrors = false
@@ -141,13 +143,13 @@ export class KeyValueStream<DataType> implements IKeyValueStream<DataType> {
                         }
                     )
                 },
-                aborted => {
+                (aborted, endData) => {
                     if (aborted || hasErrors) {
-                        errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors))).handleSafePromise(theResult => {
+                        errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors, endData))).handleSafePromise(theResult => {
                             onError(theResult)
                         })
                     } else {
-                        onSuccess(new KeyValueStream(streamifyDictionary(results)))
+                        onSuccess(new KeyValueStream(streamifyDictionary(results, endData)))
                     }
                 }
             )

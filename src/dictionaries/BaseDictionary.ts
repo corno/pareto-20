@@ -20,13 +20,18 @@ export class BaseDictionary<StoredData> {
     ) {
         this.implementation = dictionary
     }
-    public toStream<StreamType>(callback: (entry: StoredData, entryName: string) => StreamType): IKeyValueStream<StreamType> {
-        return new KeyValueStream<StoredData>(
-            streamifyDictionary(this.implementation)
+    public toStream<StreamType, EndDataType>(
+        callback: (entry: StoredData, entryName: string) => StreamType,
+        endData: EndDataType,
+    ): IKeyValueStream<StreamType, EndDataType> {
+        return new KeyValueStream<StoredData, EndDataType>(
+            streamifyDictionary(this.implementation, endData)
         ).mapRaw<StreamType>((entry, entryName) => callback(entry, entryName))
     }
-    public toKeysStream(): Stream<string> {
-        return new Stream<string>((_limiter, onData, onEnd) => {
+    public toKeysStream<EndDataType>(
+        endData: EndDataType
+    ): Stream<string, EndDataType> {
+        return new Stream((_limiter, onData, onEnd) => {
             //FIX implement limiter and abort
             const keys = Object.keys(this.implementation)
             let index = 0
@@ -36,7 +41,7 @@ export class BaseDictionary<StoredData> {
                     const result = onData(key)
                     function handleResult(abort: boolean) {
                         if (abort) {
-                            onEnd(true)
+                            onEnd(true, endData)
                         } else {
                             processNext()
                         }
@@ -51,7 +56,7 @@ export class BaseDictionary<StoredData> {
                     index += 1
                     processNext()
                 } else {
-                    onEnd(false)
+                    onEnd(false, endData)
                 }
 
             }
