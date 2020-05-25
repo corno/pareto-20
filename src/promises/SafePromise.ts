@@ -2,6 +2,7 @@ import * as api from "pareto-api"
 import { ISafePromise, SafeCallerFunction } from "./ISafePromise"
 import { IUnsafePromise } from "./IUnsafePromise"
 import { UnsafePromise, handleUnsafeDataOrPromise } from "./UnsafePromise"
+import { DataOrPromise } from "pareto-api"
 
 export class SafePromise<T> implements ISafePromise<T> {
     private readonly callerFunction: SafeCallerFunction<T>
@@ -32,10 +33,10 @@ export class SafePromise<T> implements ISafePromise<T> {
      * if you do not want to return a promise, use 'mapResultRaw'
      * @param onResult
      */
-    public mapResult<NewType>(onResult: (result: T) => SafePromise<NewType>): SafePromise<NewType> {
+    public mapResult<NewType>(onResult: (result: T) => DataOrPromise<NewType>): SafePromise<NewType> {
         return new SafePromise<NewType>(newOnResult => {
             this.handleSafePromise(res => {
-                onResult(res).handleSafePromise(newOnResult)
+                handleDataOrPromise(onResult(res), newOnResult)
             })
 
         })
