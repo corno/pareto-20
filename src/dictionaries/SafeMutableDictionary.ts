@@ -2,24 +2,22 @@
     "max-classes-per-file": off
 */
 import * as api from "pareto-api"
-import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { SafePromise } from "../promises/SafePromise"
 import { error, success, wrapUnsafePromise } from "../promises/UnsafePromise"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
-import { ISafePromise } from "../promises/ISafePromise"
 
 export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData> implements
     api.ISafeStrictDictionary<CreateData, OpenData>,
     api.ISafeLooseDictionary<CreateData, OpenData> {
-    private readonly creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, null>
+    private readonly creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, null>
     private readonly opener: (storedData: StoredData, entryName: string) => OpenData
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
         dictionary: { [key: string]: StoredData },
-        creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, null>,
+        creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, null>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
@@ -41,7 +39,9 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
             this.deleter
         )
     }
-    public copyEntry(sourceName: string, targetName: string): IUnsafePromise<null, api.SafeTwoWayError> {
+    public copyEntry(
+        sourceName: string, targetName: string
+    ): api.UnsafeDataOrPromise<null, api.SafeTwoWayError> {
         const source = this.implementation[sourceName]
         const doesNotExist = source === undefined
         const alreadyExists = this.implementation[targetName] !== undefined
@@ -51,7 +51,9 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
         this.implementation[targetName] = this.copier(source)
         return success(null)
     }
-    public deleteEntry(entryName: string): IUnsafePromise<null, api.SafeEntryDoesNotExistError> {
+    public deleteEntry(
+        entryName: string
+    ): api.UnsafeDataOrPromise<null, api.SafeEntryDoesNotExistError> {
         const entry = this.implementation[entryName]
         if (entry === undefined) {
             return error(null)
@@ -60,22 +62,26 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
         this.deleter(entry)
         return success(null)
     }
-    public getKeys<EndDataType>(
-        endData: EndDataType,
-    ): ISafePromise<Stream<string, EndDataType>> {
+    public getKeys(
+    ): api.DataOrPromise<Stream<string, boolean, null>> {
         return new SafePromise(onResult => {
             //FIXME this shouldn't be a promise
-            onResult(new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData)))
+            onResult(new Stream<string, boolean, null>(streamifyArray(Object.keys(this.implementation))))
         })
     }
-    public getEntry(entryName: string): IUnsafePromise<OpenData, api.SafeEntryDoesNotExistError> {
+    public getEntry(
+        entryName: string
+    ): api.UnsafeDataOrPromise<OpenData, api.SafeEntryDoesNotExistError> {
         const entry = this.implementation[entryName]
         if (entry === undefined) {
             return error(null)
         }
         return success(this.opener(entry, entryName))
     }
-    public createEntry(entryName: string, createData: CreateData): IUnsafePromise<null, api.SafeEntryAlreadyExistsError> {
+    public createEntry(
+        entryName: string,
+        createData: CreateData
+    ): api.UnsafeDataOrPromise<null, api.SafeEntryAlreadyExistsError> {
         if (this.implementation[entryName] !== undefined) {
             return error(null)
         }
@@ -85,7 +91,9 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
             return null
         })
     }
-    public renameEntry(oldName: string, newName: string): IUnsafePromise<null, api.SafeTwoWayError> {
+    public renameEntry(
+        oldName: string, newName: string
+    ): api.UnsafeDataOrPromise<null, api.SafeTwoWayError> {
         const entry = this.implementation[oldName]
         const doesNotExist = entry === undefined
         const alreadyExists = this.implementation[newName] !== undefined
@@ -98,10 +106,9 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
     }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 export class SafeMutableDictionary<StoredData, CreateData, OpenData> extends IntSafeMutableDictionary<StoredData, CreateData, OpenData> {
     constructor(
-        creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, null>,
+        creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, null>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void

@@ -1,10 +1,9 @@
 
-import { IUnsafePromise} from "../promises/IUnsafePromise"
+import * as api from "pareto-api"
 import { error, success } from "../promises/UnsafePromise"
 import { ILookup } from "./ILookup"
 
 
-// tslint:disable-next-line: max-classes-per-file
 export class BuildableLookup<DataType> implements ILookup<DataType> {
     private readonly dictionary: { [key: string]: DataType } = {}
     public set(key: string, element: DataType): void {
@@ -18,7 +17,7 @@ export class BuildableLookup<DataType> implements ILookup<DataType> {
         }
         return entry
     }
-    public getEntry(key: string): IUnsafePromise<DataType, null> {
+    public getEntry(key: string): api.UnsafeDataOrPromise<DataType, null> {
         const entry = this.dictionary[key]
         if (entry === undefined) {
             return error(null)

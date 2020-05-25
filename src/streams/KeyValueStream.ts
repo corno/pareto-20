@@ -1,28 +1,32 @@
 import * as api from "pareto-api"
-import { ISafePromise, DataOrPromise } from "../promises/ISafePromise"
+import { ISafePromise } from "../promises/ISafePromise"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { SafePromise, result, handleDataOrPromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { IKeyValueStream } from "./IKeyValueStream"
 import { Stream } from "./Stream"
 import { streamifyDictionary } from "./streamifyDictionary"
-import { KeyValuePair } from "pareto-api"
+import { KeyValuePair, DataOrPromise } from "pareto-api"
 import { wrap } from "../wrap"
 import { FilterResult } from "./IStream"
 
-type OnData<DataType> = api.OnData<KeyValuePair<DataType>>
+type OnData<DataType, ReturnType> = api.OnData<KeyValuePair<DataType>, ReturnType>
 
-export type ProcessKeyValueStreamFunction<DataType, EndDataType> = (limiter: null | api.StreamLimiter, onData: OnData<DataType>, onEnd: (aborted: boolean, data: EndDataType) => void) => void
+export type ProcessKeyValueStreamFunction<DataType, ReturnType, EndDataType> = (
+    limiter: null | api.StreamLimiter,
+    onData: OnData<DataType, ReturnType>,
+    onEnd: (aborted: boolean, data: EndDataType) => void
+) => void
 
-export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType, EndDataType> {
-    public readonly processStream: ProcessKeyValueStreamFunction<DataType, EndDataType>
+export class KeyValueStream<DataType, ReturnType, EndDataType> implements IKeyValueStream<DataType, ReturnType, EndDataType> {
+    public readonly processStream: ProcessKeyValueStreamFunction<DataType, ReturnType, EndDataType>
     constructor(
-        processStreamFunction: ProcessKeyValueStreamFunction<DataType, EndDataType>,
+        processStreamFunction: ProcessKeyValueStreamFunction<DataType, ReturnType, EndDataType>,
     ) {
         this.processStream = processStreamFunction
     }
-    public toKeysStream(): Stream<string, EndDataType> {
-        return new Stream<string, EndDataType>((limiter, onData, onEnd) => {
+    public toKeysStream(): Stream<string, ReturnType, EndDataType> {
+        return new Stream<string, ReturnType, EndDataType>((limiter, onData, onEnd) => {
             this.processStream(
                 limiter,
                 data => {
@@ -36,8 +40,8 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
     }
 
 
-    public map<NewDataType>(onData: (data: DataType, key: string) => DataOrPromise<NewDataType>): IKeyValueStream<NewDataType, EndDataType> {
-        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
+    public map<NewDataType>(onData: (data: DataType, key: string) => api.DataOrPromise<NewDataType>): IKeyValueStream<NewDataType, ReturnType, EndDataType> {
+        return new KeyValueStream<NewDataType, ReturnType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -50,8 +54,25 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
             )
         })
     }
-    public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType, EndDataType> {
-        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
+    public mapEndData<NewEndDataType>(convert: (data: EndDataType) => api.DataOrPromise<NewEndDataType>): IKeyValueStream<DataType, ReturnType, NewEndDataType> {
+        return new KeyValueStream<DataType, ReturnType, NewEndDataType>((newLimiter, newOnData, newOnEnd) => {
+            this.processStream(
+                newLimiter,
+                newOnData,
+                (aborted, data) => {
+                    handleDataOrPromise(
+                        convert(data),
+                        newData => {
+                            newOnEnd(aborted, newData)
+
+                        }
+                    )
+                }
+            )
+        })
+    }
+    public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType, ReturnType, EndDataType> {
+        return new KeyValueStream<NewDataType, ReturnType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
@@ -63,43 +84,39 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
         })
     }
     public filter<NewDataType>(
-        onData: (data: DataType, key: string) => DataOrPromise<FilterResult<NewDataType>>,
-    ): KeyValueStream<NewDataType, EndDataType> {
-        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
+        onData: (data: DataType, key: string) => api.DataOrPromise<FilterResult<NewDataType, ReturnType>>,
+    ): KeyValueStream<NewDataType, ReturnType, EndDataType> {
+        return new KeyValueStream<NewDataType, ReturnType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
                     const onDataResult = onData(data.value, data.key)
                     return wrap.DataOrPromise(onDataResult).mapResult(filterResult => {
-                        if (filterResult[0]) {
-                            const newResult = newOnData({
+                        if (filterResult[0]) { //keep, don't filter out
+                            return newOnData({
                                 key: data.key,
                                 value: filterResult[1],
                             })
-                            if (typeof newResult === "boolean") {
-                                return result(false)
-                            } else {
-                                return wrap.DataOrPromise(newResult).mapResult(() => {
-                                    return result(false)
-                                })
-                            }
                         }
-                        return result(false)
+                        return result(filterResult[1])
                     })
                 },
                 (aborted, endData) => newOnEnd(aborted, endData)
             )
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType, key: string) => DataOrPromise<ResultType>): ISafePromise<ResultType> {
+    public reduce<ResultType>(
+        initialValue: ResultType,
+        onData: (previousValue: ResultType, data: DataType, key: string) => api.DataOrPromise<[ResultType, ReturnType]>,
+    ): ISafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             let currentValue = initialValue
             this.processStream(
                 null, //no limiter
                 data => {
                     return wrap.DataOrPromise(onData(currentValue, data.value, data.key)).mapResult(theResult => {
-                        currentValue = theResult
-                        return result(false)
+                        currentValue = theResult[0]
+                        return result(theResult[1])
                     })
                 },
                 _aborted => {
@@ -110,10 +127,11 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
     }
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: null | api.StreamLimiter,
-        promisify: (entry: DataType, entryName: string) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType, EndDataType>) => DataOrPromise<TargetErrorType>
-    ): IUnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType> {
-        return new UnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType>((onError, onSuccess) => {
+        promisify: (entry: DataType, entryName: string) => api.UnsafeDataOrPromise<TargetType, IntermediateErrorType>,
+        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType, boolean, EndDataType>) => api.DataOrPromise<TargetErrorType>,
+        onData: (data: DataType, key: string) => DataOrPromise<ReturnType>,
+    ): IUnsafePromise<IKeyValueStream<TargetType, boolean, EndDataType>, TargetErrorType> {
+        return new UnsafePromise<IKeyValueStream<TargetType, boolean, EndDataType>, TargetErrorType>((onError, onSuccess) => {
             const results: { [key: string]: TargetType } = {}
             const errors: { [key: string]: IntermediateErrorType } = {}
             let hasErrors = false
@@ -124,23 +142,23 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
                         error => {
                             hasErrors = true
                             errors[data.key] = error
-                            return result(false)
+                            return onData(data.value, data.key)
                         },
                         theResult => {
                             results[data.key] = theResult
-                            return result(false)
+                            return onData(data.value, data.key)
                         }
                     )
                 },
                 (aborted, endData) => {
                     if (aborted || hasErrors) {
                         handleDataOrPromise(
-                            errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors, endData))),
+                            errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors)).mapEndData(() => result(endData))),
                             theResult => {
                                 onError(theResult)
                             })
                     } else {
-                        onSuccess(new KeyValueStream(streamifyDictionary(results, endData)))
+                        onSuccess(new KeyValueStream(streamifyDictionary(results)).mapEndData(() => result(endData)))
                     }
                 }
             )

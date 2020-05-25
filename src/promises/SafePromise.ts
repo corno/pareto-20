@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
-import { ISafePromise, SafeCallerFunction, DataOrPromise } from "./ISafePromise"
+import { ISafePromise, SafeCallerFunction } from "./ISafePromise"
 import { IUnsafePromise } from "./IUnsafePromise"
-import { UnsafePromise } from "./UnsafePromise"
+import { UnsafePromise, handleUnsafeDataOrPromise } from "./UnsafePromise"
 
 export class SafePromise<T> implements ISafePromise<T> {
     private readonly callerFunction: SafeCallerFunction<T>
@@ -59,10 +59,10 @@ export class SafePromise<T> implements ISafePromise<T> {
      * if this fails the new unsafe promise will be in an error state
      * @param callback
      */
-    public try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
+    public try<ResultType, ErrorType>(callback: (result: T) => api.UnsafeDataOrPromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType> {
         return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
             this.handleSafePromise(res => {
-                callback(res).handleUnsafePromise(onError, onSuccess)
+                handleUnsafeDataOrPromise(callback(res), onError, onSuccess)
             })
 
         })
@@ -83,13 +83,13 @@ export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType
 }
 
 //If a Safe Promise is required, but the result is already known
-export const result = <ResultType>(res: ResultType): DataOrPromise<ResultType> => {
+export const result = <ResultType>(res: ResultType): api.DataOrPromise<ResultType> => {
     return [res]
 }
 
 
 export function handleDataOrPromise<Type>(
-    dataOrPromise: DataOrPromise<Type>,
+    dataOrPromise: api.DataOrPromise<Type>,
     onResult: (data: Type) => void
 ): void {
     if (dataOrPromise instanceof Array) {

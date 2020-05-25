@@ -1,6 +1,7 @@
 import { BuildableStream } from "./BuildableStream"
 import { IStream } from "./IStream"
 import { IStreamBuilder } from "./IStreamBuilder"
+import { result } from "../promises/SafePromise"
 
 /**
  * callback wrapper for the IStreamBuilder.
@@ -9,8 +10,8 @@ import { IStreamBuilder } from "./IStreamBuilder"
 export function buildStream<DataType, EndDataType>(
     buildCallback: (builder: IStreamBuilder<DataType>) => void,
     endData: EndDataType
-): IStream<DataType, EndDataType> {
-    const builder = new BuildableStream<DataType, EndDataType>(endData)
+): IStream<DataType, boolean, EndDataType> {
+    const builder = new BuildableStream<DataType>()
     buildCallback(builder)
-    return builder
+    return builder.mapEndData(() => result(endData))
 }

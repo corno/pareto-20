@@ -1,6 +1,6 @@
+import * as api from "pareto-api"
 import { ISafeResource } from "./ISafeResource"
 import { SafeFunction, SafeOpenedResource } from "./SafeOpenedResource"
-import { DataOrPromise } from "../promises/ISafePromise"
 import { handleDataOrPromise } from "../promises/SafePromise"
 
 export class SafeResource<ResourceType> implements ISafeResource<ResourceType> {
@@ -15,7 +15,7 @@ export class SafeResource<ResourceType> implements ISafeResource<ResourceType> {
             }
         )
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => DataOrPromise<NewType>): ISafeResource<NewType> {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.DataOrPromise<NewType>): ISafeResource<NewType> {
         return new SafeResource<NewType>(onSuccess => {
             this.openFunction(
                 (resource, closer) => handleDataOrPromise(resourceConverter(resource), res => onSuccess(res, closer))

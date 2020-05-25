@@ -1,10 +1,9 @@
 import * as api from "pareto-api"
 import { ProcessKeyValueStreamFunction } from "./KeyValueStream"
 
-export function streamifyDictionary<ElementType, EndDataType>(
+export function streamifyDictionary<ElementType>(
     dictionary: { [key: string]: ElementType },
-    endData: EndDataType,
-): ProcessKeyValueStreamFunction<ElementType, EndDataType> {
+): ProcessKeyValueStreamFunction<ElementType, boolean, null> {
     const keys = Object.keys(dictionary)
     return (
         limiter: null | api.StreamLimiter,
@@ -12,7 +11,7 @@ export function streamifyDictionary<ElementType, EndDataType>(
             data: api.KeyValuePair<ElementType>,
             abort: () => void
         ) => void,
-        onEnd: (aborted: boolean, data: EndDataType) => void
+        onEnd: (aborted: boolean, data: null) => void
     ): void => {
         function pushData(theArray: string[], limited: boolean) {
             let abort = false
@@ -26,11 +25,11 @@ export function streamifyDictionary<ElementType, EndDataType>(
                     )
                 }
             })
-            onEnd(limited || abort, endData)
+            onEnd(limited || abort, null)
         }
         if (limiter !== null && limiter.maximum < keys.length) {
             if (limiter.abortEarly) {
-                onEnd(true, endData)
+                onEnd(true, null)
             } else {
                 pushData(keys.slice(0, limiter.maximum), true)
             }

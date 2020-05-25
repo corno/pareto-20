@@ -3,10 +3,6 @@ import { IUnsafePromise } from "./IUnsafePromise"
 
 export type SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => void
 
-export type DataOrPromise<Type> =
-    | [Type]
-    | api.ISafePromise<Type>
-
 export interface ISafePromise<T> extends api.ISafePromise<T> {
     /**
      * change the result state
@@ -14,7 +10,7 @@ export interface ISafePromise<T> extends api.ISafePromise<T> {
      * if you do not want to return a promise, use 'mapResultRaw'
      * @param onResult
      */
-    mapResult<NewType>(onResult: (result: T) => DataOrPromise<NewType>): ISafePromise<NewType>
+    mapResult<NewType>(onResult: (result: T) => api.DataOrPromise<NewType>): ISafePromise<NewType>
     /**
      * change the success state
      * the callback does not have to and should not return a promise
@@ -27,7 +23,7 @@ export interface ISafePromise<T> extends api.ISafePromise<T> {
      * if this fails the new unsafe promise will be in an error state
      * @param callback
      */
-    try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafePromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType>
+    try<ResultType, ErrorType>(callback: (result: T) => api.UnsafeDataOrPromise<ResultType, ErrorType>): IUnsafePromise<ResultType, ErrorType>
     /**
      * convert this safe promise to the JavaScript native Promise
      * only do this to interface with code that requires native Promises

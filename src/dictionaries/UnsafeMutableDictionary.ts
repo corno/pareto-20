@@ -2,22 +2,22 @@
     "max-classes-per-file": off
 */
 import * as api from "pareto-api"
-import { IUnsafePromise } from "../promises/IUnsafePromise"
 import { error, success, wrapUnsafePromise } from "../promises/UnsafePromise"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
 
-export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends BaseDictionary<StoredData> implements
+export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends
+ BaseDictionary<StoredData> implements
     api.IUnsafeLooseDictionary<CreateData, OpenData, CustomErrorType>,
     api.IUnsafeStrictDictionary<CreateData, OpenData, CustomErrorType> {
-    private readonly creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, CustomErrorType>
+    private readonly creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, CustomErrorType>
     private readonly opener: (storedData: StoredData, entryName: string) => OpenData
     private readonly copier: (storedData: StoredData) => StoredData
     private readonly deleter: (storedData: StoredData) => void
     constructor(
         dictionary: { [key: string]: StoredData },
-        creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, CustomErrorType>,
+        creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, CustomErrorType>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void
@@ -30,7 +30,7 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
     }
     public derive<NewOpenData>(
         opener: (storedData: StoredData, entryName: string) => NewOpenData,
-    ):IntUnsafeMutableDictionary<StoredData, CreateData, NewOpenData, CustomErrorType> {
+    ): IntUnsafeMutableDictionary<StoredData, CreateData, NewOpenData, CustomErrorType> {
         return new IntUnsafeMutableDictionary(
             this.implementation,
             this.creator,
@@ -39,14 +39,14 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
             this.deleter
         )
     }
-    public getEntry(entryName: string): IUnsafePromise<OpenData, api.UnsafeEntryDoesNotExistError<CustomErrorType>> {
+    public getEntry(entryName: string): api.UnsafeDataOrPromise<OpenData, api.UnsafeEntryDoesNotExistError<CustomErrorType>> {
         const entry = this.implementation[entryName]
         if (entry === undefined) {
             return error(["entry does not exist"])
         }
         return success(this.opener(entry, entryName))
     }
-    public copyEntry(sourceName: string, targetName: string): IUnsafePromise<null, api.UnsafeTwoWayError<CustomErrorType>> {
+    public copyEntry(sourceName: string, targetName: string): api.UnsafeDataOrPromise<null, api.UnsafeTwoWayError<CustomErrorType>> {
         const source = this.implementation[sourceName]
         const doesNotExist = source === undefined
         const alreadyExists = this.implementation[targetName] !== undefined
@@ -56,7 +56,7 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         this.implementation[targetName] = this.copier(source)
         return success(null)
     }
-    public deleteEntry(entryName: string): IUnsafePromise<null, api.UnsafeEntryDoesNotExistError<CustomErrorType>> {
+    public deleteEntry(entryName: string): api.UnsafeDataOrPromise<null, api.UnsafeEntryDoesNotExistError<CustomErrorType>> {
         const entry = this.implementation[entryName]
         if (entry === undefined) {
             return error(["entry does not exist"])
@@ -65,14 +65,16 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         this.deleter(entry)
         return success(null)
     }
-    public getKeys<EndDataType>(
-        endData: EndDataType,
-    ): IUnsafePromise<Stream<string, EndDataType>, CustomErrorType> {
+    public getKeys(
+    ): api.UnsafeDataOrPromise<Stream<string, boolean, null>, CustomErrorType> {
         return success(
-            new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData))
+            new Stream<string, boolean, null>(streamifyArray(Object.keys(this.implementation)))
         )
     }
-    public createEntry(entryName: string, createData: CreateData): IUnsafePromise<null, api.UnsafeEntryAlreadyExistsError<CustomErrorType>> {
+    public createEntry(
+        entryName: string,
+        createData: CreateData
+    ): api.UnsafeDataOrPromise<null, api.UnsafeEntryAlreadyExistsError<CustomErrorType>> {
         if (this.implementation[entryName] !== undefined) {
             return error(["entry already exists"])
         }
@@ -84,7 +86,10 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
             return null
         })
     }
-    public renameEntry(oldName: string, newName: string): IUnsafePromise<null, api.UnsafeTwoWayError<CustomErrorType>> {
+    public renameEntry(
+        oldName: string,
+        newName: string
+    ): api.UnsafeDataOrPromise<null, api.UnsafeTwoWayError<CustomErrorType>> {
         const entry = this.implementation[oldName]
         const doesNotExist = entry === undefined
         const alreadyExists = this.implementation[newName] !== undefined
@@ -97,10 +102,9 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
     }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 export class UnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> {
     constructor(
-        creator: (createData: CreateData, entryName: string) => api.IUnsafePromise<StoredData, CustomErrorType>,
+        creator: (createData: CreateData, entryName: string) => api.UnsafeDataOrPromise<StoredData, CustomErrorType>,
         opener: (storedData: StoredData, entryName: string) => OpenData,
         copier: (storedData: StoredData) => StoredData,
         deleter: (storedData: StoredData) => void

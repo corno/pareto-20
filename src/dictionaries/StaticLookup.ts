@@ -1,7 +1,7 @@
 
-import { IUnsafePromise} from "../promises/IUnsafePromise"
 import { error, success } from "../promises/UnsafePromise"
 import { ILookup } from "./ILookup"
+import * as api from "pareto-api"
 
 
 export class StaticLookup<DataType> implements ILookup<DataType> {
@@ -9,7 +9,7 @@ export class StaticLookup<DataType> implements ILookup<DataType> {
     constructor(dictionary: { [key: string]: DataType }) {
         this.dictionary = dictionary
     }
-    public getEntry(key: string): IUnsafePromise<DataType, null> {
+    public getEntry(key: string): api.UnsafeDataOrPromise<DataType, null> {
         const entry = this.dictionary[key]
         if (entry === undefined) {
             return error(null)

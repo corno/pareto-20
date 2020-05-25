@@ -5,14 +5,13 @@ import { streamifyArray } from "./streamifyArray"
 /**
  * Allows for the creation of a stream that can be incrementally built with the push function.
  */
-export class BuildableStream<DataType, EndDataType> extends Stream<DataType, EndDataType> implements IStreamBuilder<DataType> {
+export class BuildableStream<DataType> extends Stream<DataType, boolean, null> implements IStreamBuilder<DataType> {
     private readonly array: DataType[]
     constructor(
-        endData: EndDataType
     ) {
         const array: DataType[] = []
 
-        super(streamifyArray(array, endData))
+        super(streamifyArray(array))
         this.array = array
     }
     public push(element: DataType): void {

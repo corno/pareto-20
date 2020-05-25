@@ -1,8 +1,8 @@
+import * as api from "pareto-api"
 import { SafePromise, handleDataOrPromise } from "./SafePromise"
-import { DataOrPromise } from "./ISafePromise"
 
 export function mergeArrayOfSafePromises<ResultType>(
-    array: DataOrPromise<ResultType>[],
+    array: api.DataOrPromise<ResultType>[],
 ): SafePromise<ResultType[]> {
     let isExecuted = false
     function execute(onResult: (results: ResultType[]) => void) {

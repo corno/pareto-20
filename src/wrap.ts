@@ -1,9 +1,9 @@
 import * as api from "pareto-api"
 
-import { ISafePromise, DataOrPromise } from "./promises/ISafePromise"
+import { ISafePromise } from "./promises/ISafePromise"
 import { IUnsafePromise } from "./promises/IUnsafePromise"
 import { SafePromise, handleDataOrPromise } from "./promises/SafePromise"
-import { UnsafePromise } from "./promises/UnsafePromise"
+import { UnsafePromise, handleUnsafeDataOrPromise } from "./promises/UnsafePromise"
 
 import { IKeyValueStream } from "./streams/IKeyValueStream"
 import { IStream } from "./streams/IStream"
@@ -29,14 +29,14 @@ export type OnKeyConflict =
     ["abort"]
 
 export const wrap = {
-    KeyValueStream: <DataType, EndDataType>(
-        stream: api.IKeyValueStream<DataType, EndDataType>,
+    KeyValueStream: <DataType, ReturnType, EndDataType>(
+        stream: api.IKeyValueStream<DataType, ReturnType, EndDataType>,
         onKeyConflict: OnKeyConflict
-    ): IKeyValueStream<DataType, EndDataType> => {
+    ): IKeyValueStream<DataType, ReturnType, EndDataType> => {
         switch (onKeyConflict[0]) {
             case "abort": {
                 const keys: { [key: string]: null } = {}
-                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
+                return new KeyValueStream<DataType, ReturnType, EndDataType>((limiter, onData, onEnd) => {
                     stream.processStream(
                         limiter,
                         data => {
@@ -50,7 +50,7 @@ export const wrap = {
                 })
             }
             case "ignore": {
-                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
+                return new KeyValueStream<DataType, ReturnType, EndDataType>((limiter, onData, onEnd) => {
                     stream.processStream(limiter, onData, onEnd)
                 })
             }
@@ -59,7 +59,7 @@ export const wrap = {
                 throw new Error("UNREACHABLE")
         }
     },
-    DataOrPromise: <SourceResultType>(dataOrPromise: DataOrPromise<SourceResultType>): ISafePromise<SourceResultType> => {
+    DataOrPromise: <SourceResultType>(dataOrPromise: api.DataOrPromise<SourceResultType>): ISafePromise<SourceResultType> => {
         return new SafePromise<SourceResultType>(onResult => {
             handleDataOrPromise(dataOrPromise, onResult)
         })
@@ -69,9 +69,9 @@ export const wrap = {
             promise.handleSafePromise(onResult)
         })
     },
-    UnsafePromise: <SourceResultType, SourceErrorType>(promise: api.IUnsafePromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
+    UnsafePromise: <SourceResultType, SourceErrorType>(promise: api.UnsafeDataOrPromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
         return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {
-            promise.handleUnsafePromise(onError, onSucces)
+            handleUnsafeDataOrPromise(promise, onError, onSucces)
         })
     },
     // SafeResource: <T>(safeResource: ISafeResource<T>): ISafeResource<T> => {
@@ -110,8 +110,8 @@ export const wrap = {
     //         })
     //     })
     // },
-    Stream: <DataType, EndDataType>(stream: api.IStream<DataType, EndDataType>): IStream<DataType, EndDataType> => {
-        return new Stream<DataType, EndDataType>((limiter, onData, onEnd) => {
+    Stream: <DataType, ReturnType, EndDataType>(stream: api.IStream<DataType, ReturnType, EndDataType>): IStream<DataType, ReturnType, EndDataType> => {
+        return new Stream<DataType, ReturnType, EndDataType>((limiter, onData, onEnd) => {
             stream.processStream(limiter, onData, onEnd)
         })
     },

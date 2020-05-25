@@ -7,39 +7,39 @@ import { Stream } from "./Stream"
 import { wrap } from "../wrap"
 import { result } from "../promises/SafePromise"
 
-export function mergeStreamOfUnsafePromises<DataType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
-    stream: api.IStream<DataType, EndDataType>,
+export function mergeStreamOfUnsafePromises<DataType, ReturnType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+    stream: api.IStream<DataType, ReturnType, EndDataType>,
     limiter: null | api.StreamLimiter,
-    promisify: (entry: DataType) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-    createError: (aborted: boolean, errors: Stream<IntermediateErrorType, EndDataType>) => ErrorType,
-    abortOnError: boolean,
-): IUnsafePromise<IStream<TargetType, EndDataType>, ErrorType> {
-    return new UnsafePromise<IStream<TargetType, EndDataType>, ErrorType>((onError, onSuccess) => {
+    onData: (entry: DataType) => [api.UnsafeDataOrPromise<TargetType, IntermediateErrorType>, ReturnType],
+    createError: (aborted: boolean, errors: Stream<IntermediateErrorType, boolean, EndDataType>) => ErrorType,
+): IUnsafePromise<IStream<TargetType, boolean, EndDataType>, ErrorType> {
+    return new UnsafePromise<IStream<TargetType, boolean, EndDataType>, ErrorType>((onError, onSuccess) => {
         let hasErrors = false
         const errors: IntermediateErrorType[] = []
         const results: TargetType[] = []
         stream.processStream(
             limiter,
             data => {
-                return wrap.UnsafePromise(promisify(
+                const rv = onData(
                     data
-                )).reworkAndCatch(
+                )
+                return wrap.UnsafePromise(rv[0]).reworkAndCatch(
                     error => {
                         hasErrors = true
                         errors.push(error)
-                        return result(abortOnError)
+                        return result(rv[1])
                     },
                     theResult => {
                         results.push(theResult)
-                        return result(false)
+                        return result(rv[1])
                     }
                 )
             },
             (aborted, endData) => {
                 if (hasErrors) {
-                    onError(createError(aborted, new StaticStream(errors, endData)))
+                    onError(createError(aborted, new StaticStream(errors).mapEndData(() => result(endData))))
                 } else {
-                    onSuccess(new StaticStream(results, endData))
+                    onSuccess(new StaticStream(results).mapEndData(() => result( endData)))
                 }
             }
         )
