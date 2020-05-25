@@ -1,11 +1,12 @@
 import * as api from "pareto-api"
-import { SafePromise } from "../promises/SafePromise"
+import { SafePromise, handleDataOrPromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { KeyValueStream } from "../streams/KeyValueStream"
 import { Stream } from "../streams/Stream"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { ILookup } from "./ILookup"
 import { IKeyValueStream } from "../streams/IKeyValueStream"
+import { DataOrPromise } from "../promises/ISafePromise"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
@@ -49,7 +50,7 @@ export class BaseDictionary<StoredData> {
                     if (typeof result === "boolean") {
                         handleResult(result)
                     } else {
-                        result.handleSafePromise(promiseResult => {
+                        handleDataOrPromise(result, promiseResult => {
                             handleResult(promiseResult)
                         })
                     }
@@ -108,7 +109,7 @@ export class BaseDictionary<StoredData> {
             }
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.ISafePromise<ResultType>): SafePromise<ResultType> {
+    public reduce<ResultType>(initialValue: ResultType, callback: (previousValue: ResultType, entry: StoredData, entryName: string) => DataOrPromise<ResultType>): SafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue
@@ -116,7 +117,7 @@ export class BaseDictionary<StoredData> {
             while (currentIndex !== keys.length) {
                 const currentKey = keys[currentIndex]
                 const currentEntry = this.implementation[currentKey]
-                callback(currentValue, currentEntry, currentKey).handleSafePromise(result => {
+                handleDataOrPromise( callback(currentValue, currentEntry, currentKey), result => {
                     currentValue = result
                 })
                 currentIndex += 1

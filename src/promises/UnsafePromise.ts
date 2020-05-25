@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
-import { ISafePromise } from "./ISafePromise"
+import { ISafePromise, DataOrPromise } from "./ISafePromise"
 import { IUnsafePromise } from "./IUnsafePromise"
-import { result, SafePromise } from "./SafePromise"
+import { result, SafePromise, handleDataOrPromise } from "./SafePromise"
 
 export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<ResultType, ErrorType> {
     private isCalled: boolean
@@ -38,7 +38,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      * @param onSuccess
      */
     public mapResult<NewResultType>(
-        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
+        onSuccess: (result: ResultType) => DataOrPromise<NewResultType>
     ): UnsafePromise<NewResultType, ErrorType> {
         return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
@@ -46,7 +46,7 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
                     newOnError(err)
                 },
                 data => {
-                    onSuccess(data).handleSafePromise(newResult => {
+                    handleDataOrPromise( onSuccess(data), newResult => {
                         newOnSuccess(newResult)
                     })
                 }
@@ -72,12 +72,12 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      * @param onError
      */
     public mapError<NewErrorType>(
-        onError: (error: ErrorType) => api.ISafePromise<NewErrorType>,
+        onError: (error: ErrorType) => DataOrPromise<NewErrorType>,
     ): UnsafePromise<ResultType, NewErrorType> {
         return new UnsafePromise((newOnError, newOnSuccess) => {
             this.handleUnsafePromise(
                 err => {
-                    onError(err).handleSafePromise(res => newOnError(res))
+                    handleDataOrPromise( onError(err), res => newOnError(res))
                 },
                 res => {
                     newOnSuccess(res)
@@ -197,16 +197,16 @@ export class UnsafePromise<ResultType, ErrorType> implements IUnsafePromise<Resu
      * @param onSuccess
      */
     public reworkAndCatch<NewResultType>(
-        onError: (error: ErrorType) => api.ISafePromise<NewResultType>,
-        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
+        onError: (error: ErrorType) => DataOrPromise<NewResultType>,
+        onSuccess: (result: ResultType) => DataOrPromise<NewResultType>
     ): ISafePromise<NewResultType> {
         return new SafePromise<NewResultType>(onResult => {
             this.handleUnsafePromise(
                 err => {
-                    onError(err).handleSafePromise(res => onResult(res))
+                    handleDataOrPromise(onError(err), res => onResult(res))
                 },
                 data => {
-                    onSuccess(data).handleSafePromise(res => onResult(res))
+                    handleDataOrPromise(onSuccess(data), res => onResult(res))
                 },
             )
         })

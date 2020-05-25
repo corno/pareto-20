@@ -1,8 +1,8 @@
 import * as api from "pareto-api"
 
-import { ISafePromise } from "./promises/ISafePromise"
+import { ISafePromise, DataOrPromise } from "./promises/ISafePromise"
 import { IUnsafePromise } from "./promises/IUnsafePromise"
-import { SafePromise } from "./promises/SafePromise"
+import { SafePromise, handleDataOrPromise } from "./promises/SafePromise"
 import { UnsafePromise } from "./promises/UnsafePromise"
 
 import { IKeyValueStream } from "./streams/IKeyValueStream"
@@ -58,6 +58,11 @@ export const wrap = {
                 assertUnreachable(onKeyConflict[0])
                 throw new Error("UNREACHABLE")
         }
+    },
+    DataOrPromise: <SourceResultType>(dataOrPromise: DataOrPromise<SourceResultType>): ISafePromise<SourceResultType> => {
+        return new SafePromise<SourceResultType>(onResult => {
+            handleDataOrPromise(dataOrPromise, onResult)
+        })
     },
     SafePromise: <SourceResultType>(promise: api.ISafePromise<SourceResultType>): ISafePromise<SourceResultType> => {
         return new SafePromise<SourceResultType>(onResult => {

@@ -1,8 +1,9 @@
-import * as api from "pareto-api"
 import { ISafeResource } from "./ISafeResource"
 import { IUnsafeOnCloseResource } from "./IUnsafeOnCloseResource"
 import { SafeResource } from "./SafeResource"
 import { UnsafeOnCloseFunction, UnsafeOpenedResource } from "./UnsafeOpenedResource"
+import { DataOrPromise } from "../promises/ISafePromise"
+import { handleDataOrPromise } from "../promises/SafePromise"
 
 export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseResource<ResourceType, CloseError> {
     private readonly openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>
@@ -27,10 +28,10 @@ export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeO
             )
         })
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.ISafePromise<NewType>): IUnsafeOnCloseResource<NewType, CloseError> {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => DataOrPromise<NewType>): IUnsafeOnCloseResource<NewType, CloseError> {
         return new UnsafeOnCloseResource<NewType, CloseError>(onOpened => {
             this.openFunction(
-                (resource, closer) => resourceConverter(resource).handleSafePromise(res => onOpened(res, closer))
+                (resource, closer) => handleDataOrPromise(resourceConverter(resource), res => onOpened(res, closer))
             )
         })
     }

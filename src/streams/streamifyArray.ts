@@ -1,6 +1,8 @@
 
 import { ProcessStreamFunction } from "./Stream"
 import * as api from "pareto-api"
+import { DataOrPromise } from "../promises/ISafePromise"
+import { handleDataOrPromise } from "../promises/SafePromise"
 
 /**
  * this function can be used as the argument to a stream: 'new Stream(streamifyArray(["x"]))'
@@ -13,7 +15,7 @@ export function streamifyArray<ElementType, EndDataType>(
     ): ProcessStreamFunction<ElementType, EndDataType> {
     return (
         limiter: null | api.StreamLimiter,
-        onData: (data: ElementType) => api.ISafePromise<boolean> | boolean,
+        onData: (data: ElementType) => DataOrPromise<boolean> | boolean,
         onEnd: (aborted: boolean, endData: EndDataType) => void
     ): void => {
         function pushData(theArray: ElementType[], limited: boolean) {
@@ -26,7 +28,7 @@ export function streamifyArray<ElementType, EndDataType>(
                             abort = true
                         }
                     } else {
-                        onDataResult.handleSafePromise(abortRequested => {
+                        handleDataOrPromise(onDataResult, abortRequested => {
                             if (abortRequested) {
                                 abort = true
                             }

@@ -1,8 +1,8 @@
-import { SafePromise } from "./SafePromise"
-import * as api from "pareto-api"
+import { SafePromise, handleDataOrPromise } from "./SafePromise"
+import { DataOrPromise } from "./ISafePromise"
 
 export function mergeArrayOfSafePromises<ResultType>(
-    array: api.ISafePromise<ResultType>[],
+    array: DataOrPromise<ResultType>[],
 ): SafePromise<ResultType[]> {
     let isExecuted = false
     function execute(onResult: (results: ResultType[]) => void) {
@@ -27,7 +27,8 @@ export function mergeArrayOfSafePromises<ResultType>(
         } else {
             array.forEach((element, index) => {
                 (() => {
-                    element.handleSafePromise(
+                    handleDataOrPromise(
+                        element,
                         result => {
                             results[index] = result
                             resolvedCount += 1

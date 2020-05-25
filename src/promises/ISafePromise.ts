@@ -3,6 +3,10 @@ import { IUnsafePromise } from "./IUnsafePromise"
 
 export type SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => void
 
+export type DataOrPromise<Type> =
+    | [Type]
+    | api.ISafePromise<Type>
+
 export interface ISafePromise<T> extends api.ISafePromise<T> {
     /**
      * change the result state
@@ -10,7 +14,7 @@ export interface ISafePromise<T> extends api.ISafePromise<T> {
      * if you do not want to return a promise, use 'mapResultRaw'
      * @param onResult
      */
-    mapResult<NewType>(onResult: (result: T) => api.ISafePromise<NewType>): ISafePromise<NewType>
+    mapResult<NewType>(onResult: (result: T) => DataOrPromise<NewType>): ISafePromise<NewType>
     /**
      * change the success state
      * the callback does not have to and should not return a promise

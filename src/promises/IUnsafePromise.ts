@@ -1,5 +1,5 @@
 import * as api from "pareto-api"
-import { ISafePromise } from "./ISafePromise"
+import { ISafePromise, DataOrPromise } from "./ISafePromise"
 
 export interface IUnsafePromise<ResultType, ErrorType> extends api.IUnsafePromise<ResultType, ErrorType> {
     /**
@@ -10,7 +10,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends api.IUnsafePromis
      * @param onSuccess
      */
     mapResult<NewResultType>(
-        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
+        onSuccess: (result: ResultType) => DataOrPromise<NewResultType>
     ): IUnsafePromise<NewResultType, ErrorType>
     /**
      * change the success state
@@ -29,7 +29,7 @@ export interface IUnsafePromise<ResultType, ErrorType> extends api.IUnsafePromis
      * @param onError
      */
     mapError<NewErrorType>(
-        onError: (error: ErrorType) => api.ISafePromise<NewErrorType>
+        onError: (error: ErrorType) => DataOrPromise<NewErrorType>
     ): IUnsafePromise<ResultType, NewErrorType>
     /**
      * change the error state
@@ -91,8 +91,8 @@ export interface IUnsafePromise<ResultType, ErrorType> extends api.IUnsafePromis
      * @param onSuccess
      */
     reworkAndCatch<NewResultType>(
-        onError: (error: ErrorType) => api.ISafePromise<NewResultType>,
-        onSuccess: (result: ResultType) => api.ISafePromise<NewResultType>
+        onError: (error: ErrorType) => DataOrPromise<NewResultType>,
+        onSuccess: (result: ResultType) => DataOrPromise<NewResultType>
     ): ISafePromise<NewResultType>
     /**
      * convert this unsafe promise to the JavaScript native Promise

@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
-import { ISafePromise } from "../promises/ISafePromise"
+import { ISafePromise, DataOrPromise } from "../promises/ISafePromise"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
-import { SafePromise, result } from "../promises/SafePromise"
+import { SafePromise, result, handleDataOrPromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { FilterResult, IStream } from "./IStream"
 import { streamifyArray } from "./streamifyArray"
@@ -25,7 +25,7 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
             limiter,
             data => {
                 array.push(data)
-                return false
+                return [false]
             },
             aborted => {
                 if (aborted && onAborted !== null) { onAborted() }
@@ -34,12 +34,12 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
         return array
     }
 
-    public map<NewDataType>(onData: (data: DataType) => api.ISafePromise<NewDataType>): IStream<NewDataType, EndDataType> {
+    public map<NewDataType>(onData: (data: DataType) => DataOrPromise<NewDataType>): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
-                    return wrap.SafePromise(onData(data)).mapResult(firstResult => {
+                    return wrap.DataOrPromise(onData(data)).mapResult(firstResult => {
                         const newResult = newOnData(firstResult)
                         if (typeof newResult === "boolean") {
                             return result(newResult)
@@ -64,20 +64,20 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
         })
     }
     public filter<NewDataType>(
-        onData: (data: DataType) => api.ISafePromise<FilterResult<NewDataType>>,
+        onData: (data: DataType) => DataOrPromise<FilterResult<NewDataType>>,
     ): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
                     const onDataResult = onData(data)
-                    return wrap.SafePromise(onDataResult).mapResult(filterResult => {
+                    return wrap.DataOrPromise(onDataResult).mapResult(filterResult => {
                         if (filterResult[0]) {
                             const newResult = newOnData(filterResult[1])
                             if (typeof newResult === "boolean") {
                                 return result(false)
                             } else {
-                                return wrap.SafePromise(newResult).mapResult(() => {
+                                return wrap.DataOrPromise(newResult).mapResult(() => {
                                     return result(false)
                                 })
                             }
@@ -90,13 +90,13 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
             )
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType) => api.ISafePromise<ResultType>): ISafePromise<ResultType> {
+    public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType) => DataOrPromise<ResultType>): ISafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             let currentValue = initialValue
             this.processStream(
                 null, //no limiter
                 data => {
-                    return wrap.SafePromise(onData(currentValue, data)).mapResult(theResult => {
+                    return wrap.DataOrPromise(onData(currentValue, data)).mapResult(theResult => {
                         currentValue = theResult
                         return result(false)
                     })
@@ -110,7 +110,7 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: null | api.StreamLimiter,
         promisify: (entry: DataType) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-        errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => api.ISafePromise<TargetErrorType>
+        errorHandler: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => DataOrPromise<TargetErrorType>
     ): IUnsafePromise<IStream<TargetType, EndDataType>, TargetErrorType> {
         return new UnsafePromise<IStream<TargetType, EndDataType>, TargetErrorType>((onError, onSuccess) => {
             const results: TargetType[] = []
@@ -133,7 +133,7 @@ export class Stream<DataType, EndDataType> implements IStream<DataType, EndDataT
                 },
                 (aborted, endData) => {
                     if (aborted || hasErrors) {
-                        errorHandler(aborted, new Stream(streamifyArray(errors, endData))).handleSafePromise(theResult => {
+                        handleDataOrPromise( errorHandler(aborted, new Stream(streamifyArray(errors, endData))), theResult => {
                             onError(theResult)
                         })
                     } else {

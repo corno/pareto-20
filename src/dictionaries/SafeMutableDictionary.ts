@@ -3,11 +3,12 @@
 */
 import * as api from "pareto-api"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
-import { result, SafePromise } from "../promises/SafePromise"
+import { SafePromise } from "../promises/SafePromise"
 import { error, success, wrapUnsafePromise } from "../promises/UnsafePromise"
 import { Stream } from "../streams/Stream"
 import { streamifyArray } from "../streams/streamifyArray"
 import { BaseDictionary } from "./BaseDictionary"
+import { ISafePromise } from "../promises/ISafePromise"
 
 export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends BaseDictionary<StoredData> implements
     api.ISafeStrictDictionary<CreateData, OpenData>,
@@ -61,10 +62,11 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
     }
     public getKeys<EndDataType>(
         endData: EndDataType,
-    ): SafePromise<Stream<string, EndDataType>> {
-        return result(
-            new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData))
-        )
+    ): ISafePromise<Stream<string, EndDataType>> {
+        return new SafePromise(onResult => {
+            //FIXME this shouldn't be a promise
+            onResult(new Stream<string, EndDataType>(streamifyArray(Object.keys(this.implementation), endData)))
+        })
     }
     public getEntry(entryName: string): IUnsafePromise<OpenData, api.SafeEntryDoesNotExistError> {
         const entry = this.implementation[entryName]

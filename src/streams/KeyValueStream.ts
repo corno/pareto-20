@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
-import { ISafePromise } from "../promises/ISafePromise"
+import { ISafePromise, DataOrPromise } from "../promises/ISafePromise"
 import { IUnsafePromise } from "../promises/IUnsafePromise"
-import { SafePromise, result } from "../promises/SafePromise"
+import { SafePromise, result, handleDataOrPromise } from "../promises/SafePromise"
 import { UnsafePromise } from "../promises/UnsafePromise"
 import { IKeyValueStream } from "./IKeyValueStream"
 import { Stream } from "./Stream"
@@ -36,20 +36,14 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
     }
 
 
-    public map<NewDataType>(onData: (data: DataType, key: string) => api.ISafePromise<NewDataType>): IKeyValueStream<NewDataType, EndDataType> {
+    public map<NewDataType>(onData: (data: DataType, key: string) => DataOrPromise<NewDataType>): IKeyValueStream<NewDataType, EndDataType> {
         return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
-                    return wrap.SafePromise(onData(data.value, data.key)).mapResult(theResult => {
-                        const newResult = newOnData({ key: data.key, value: theResult })
-                        function onDataResult(dataResult: boolean | api.ISafePromise<boolean>): api.ISafePromise<boolean> {
-                            if (typeof dataResult === "boolean") {
-                                return result(dataResult)
-                            }
-                            return dataResult
-                        }
-                        return onDataResult(newResult)
+                    const promise = wrap.DataOrPromise(onData(data.value, data.key))
+                    return promise.mapResult(theResult => {
+                        return newOnData({ key: data.key, value: theResult })
                     })
                 },
                 (aborted, data) => newOnEnd(aborted, data)
@@ -61,27 +55,22 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
             this.processStream(
                 newLimiter,
                 data => {
-                    function onDataResult(dataResult: boolean | api.ISafePromise<boolean>): api.ISafePromise<boolean> {
-                        if (typeof dataResult === "boolean") {
-                            return result(dataResult)
-                        }
-                        return dataResult
-                    }
-                    return onDataResult(newOnData({ key: data.key, value: onData(data.value, data.key) }))
+                    const dataResult = newOnData({ key: data.key, value: onData(data.value, data.key) })
+                    return dataResult
                 },
                 (aborted, data) => newOnEnd(aborted, data)
             )
         })
     }
     public filter<NewDataType>(
-        onData: (data: DataType, key: string) => api.ISafePromise<FilterResult<NewDataType>>,
+        onData: (data: DataType, key: string) => DataOrPromise<FilterResult<NewDataType>>,
     ): KeyValueStream<NewDataType, EndDataType> {
         return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             this.processStream(
                 newLimiter,
                 data => {
                     const onDataResult = onData(data.value, data.key)
-                    return wrap.SafePromise(onDataResult).mapResult(filterResult => {
+                    return wrap.DataOrPromise(onDataResult).mapResult(filterResult => {
                         if (filterResult[0]) {
                             const newResult = newOnData({
                                 key: data.key,
@@ -90,7 +79,7 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
                             if (typeof newResult === "boolean") {
                                 return result(false)
                             } else {
-                                return wrap.SafePromise(newResult).mapResult(() => {
+                                return wrap.DataOrPromise(newResult).mapResult(() => {
                                     return result(false)
                                 })
                             }
@@ -102,13 +91,13 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
             )
         })
     }
-    public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType, key: string) => api.ISafePromise<ResultType>): ISafePromise<ResultType> {
+    public reduce<ResultType>(initialValue: ResultType, onData: (previousValue: ResultType, data: DataType, key: string) => DataOrPromise<ResultType>): ISafePromise<ResultType> {
         return new SafePromise<ResultType>(onResult => {
             let currentValue = initialValue
             this.processStream(
                 null, //no limiter
                 data => {
-                    return wrap.SafePromise(onData(currentValue, data.value, data.key)).mapResult(theResult => {
+                    return wrap.DataOrPromise(onData(currentValue, data.value, data.key)).mapResult(theResult => {
                         currentValue = theResult
                         return result(false)
                     })
@@ -122,7 +111,7 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
     public tryAll<TargetType, IntermediateErrorType, TargetErrorType>(
         limiter: null | api.StreamLimiter,
         promisify: (entry: DataType, entryName: string) => api.IUnsafePromise<TargetType, IntermediateErrorType>,
-        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType, EndDataType>) => api.ISafePromise<TargetErrorType>
+        errorHandler: (aborted: boolean, errors: IKeyValueStream<IntermediateErrorType, EndDataType>) => DataOrPromise<TargetErrorType>
     ): IUnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType> {
         return new UnsafePromise<IKeyValueStream<TargetType, EndDataType>, TargetErrorType>((onError, onSuccess) => {
             const results: { [key: string]: TargetType } = {}
@@ -145,9 +134,11 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
                 },
                 (aborted, endData) => {
                     if (aborted || hasErrors) {
-                        errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors, endData))).handleSafePromise(theResult => {
-                            onError(theResult)
-                        })
+                        handleDataOrPromise(
+                            errorHandler(aborted, new KeyValueStream(streamifyDictionary(errors, endData))),
+                            theResult => {
+                                onError(theResult)
+                            })
                     } else {
                         onSuccess(new KeyValueStream(streamifyDictionary(results, endData)))
                     }
