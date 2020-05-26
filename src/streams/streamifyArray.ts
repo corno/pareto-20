@@ -1,8 +1,49 @@
 
 import { ProcessStreamFunction } from "./Stream"
 import * as api from "pareto-api"
-import { handleDataOrPromise } from "../promises/SafePromise"
+import { result, handleDataOrPromise } from "../promises/SafePromise"
 import { DataOrPromise } from "pareto-api"
+import { wrap } from "../wrap"
+
+type State = {
+    index: number
+    mustAbort: boolean
+}
+
+function loopUntilEndOrPromise<ElementType>(
+    array: ElementType[],
+    state: State,
+    onData: (data: ElementType) => DataOrPromise<boolean>,
+): DataOrPromise<boolean> {
+    while (true) {
+        if (state.mustAbort) {
+            return result(true)
+        }
+        if (state.index === array.length) {
+            return result(false) //end reached
+        }
+        const x = onData(array[state.index])
+        state.index += 1
+        if (x instanceof Array) {
+            if (x[0]) {
+                state.mustAbort = true
+                return result(true) //abort
+            }
+        } else {
+            return wrap.SafePromise(x).mapResult(mustAbort => {
+                if (mustAbort) {
+                    state.mustAbort = true
+                    return result(true)
+                }
+                return loopUntilEndOrPromise(
+                    array,
+                    state,
+                    onData,
+                )
+            })
+        }
+    }
+}
 
 /**
  * this function can be used as the argument to a stream: 'new Stream(streamifyArray(["x"]))'
@@ -18,18 +59,24 @@ export function streamifyArray<ElementType>(
         onEnd: (aborted: boolean, endData: null) => void
     ): void => {
         function pushData(theArray: ElementType[], limited: boolean) {
-            let abort = false
-            theArray.forEach(element => {
-                if (!abort) {
-                    const onDataResult = onData(element)
-                    handleDataOrPromise(onDataResult, abortRequested => {
-                        if (abortRequested) {
-                            abort = true
-                        }
-                    })
-                }
-            })
-            onEnd(limited || abort, null)
+            const state: State = {
+                index: 0,
+                mustAbort: false,
+            }
+            handleDataOrPromise(
+                loopUntilEndOrPromise(
+                    theArray,
+                    state,
+                    onData
+                ),
+                abortRequested => {
+                    if (abortRequested) {
+                        state.mustAbort = true
+                    }
+                    onEnd(limited || state.mustAbort, null)
+
+                },
+            )
         }
         if (limiter !== null && limiter.maximum < array.length) {
             if (limiter.abortEarly) {
