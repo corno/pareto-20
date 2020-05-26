@@ -48,6 +48,7 @@ export * from "./streams/Stream"
 export * from "./streams/buildStream"
 export * from "./streams/mergeStreamOfUnsafePromises"
 export * from "./streams/streamifyArray"
+export * from "./streams/streamifyArrayToConsumer"
 export * from "./streams/streamifyDictionary"
 
 export { wrap } from "./wrap"
