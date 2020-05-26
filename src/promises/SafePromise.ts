@@ -88,7 +88,6 @@ export const result = <ResultType>(res: ResultType): api.DataOrPromise<ResultTyp
     return [res]
 }
 
-
 export function handleDataOrPromise<Type>(
     dataOrPromise: api.DataOrPromise<Type>,
     onResult: (data: Type) => void
@@ -96,6 +95,6 @@ export function handleDataOrPromise<Type>(
     if (dataOrPromise instanceof Array) {
         onResult(dataOrPromise[0])
     } else {
-        handleDataOrPromise(dataOrPromise, onResult)
+        dataOrPromise.handleSafePromise(onResult)
     }
 }
