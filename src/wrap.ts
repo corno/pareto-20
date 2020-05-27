@@ -69,6 +69,11 @@ export const wrap = {
             promise.handleSafePromise(onResult)
         })
     },
+    UnsafeDataOrPromise: <SourceResultType, SourceErrorType>(dataOrPromise: api.UnsafeDataOrPromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
+        return new UnsafePromise<SourceResultType, SourceErrorType>((onResult, onError) => {
+            handleUnsafeDataOrPromise(dataOrPromise, onResult, onError)
+        })
+    },
     UnsafePromise: <SourceResultType, SourceErrorType>(promise: api.UnsafeDataOrPromise<SourceResultType, SourceErrorType>): IUnsafePromise<SourceResultType, SourceErrorType> => {
         return new UnsafePromise<SourceResultType, SourceErrorType>((onError, onSucces) => {
             handleUnsafeDataOrPromise(promise, onError, onSucces)
