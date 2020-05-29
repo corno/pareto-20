@@ -1,11 +1,12 @@
 import * as api from "pareto-api"
-import { SafePromise, handleDataOrPromise } from "../promises/SafePromise"
-import { UnsafePromise, handleUnsafeDataOrPromise } from "../promises/UnsafePromise"
+import { Value } from "../values/SafeValue"
+import { UnsafeValue } from "../values/UnsafeValue"
 import { KeyValueStream } from "../streams/KeyValueStream"
-import { Stream } from "../streams/Stream"
 import { streamifyDictionary } from "../streams/streamifyDictionary"
 import { ILookup } from "./ILookup"
 import { IKeyValueStream } from "../streams/IKeyValueStream"
+import { streamifyArray } from "../streams/streamifyArray"
+import { IStream } from "pareto-api"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
@@ -22,50 +23,19 @@ export class BaseDictionary<StoredData> {
     }
     public toStream<StreamType>(
         callback: (entry: StoredData, entryName: string) => StreamType,
-    ): IKeyValueStream<StreamType, boolean, null> {
-        return new KeyValueStream<StoredData, boolean, null>(
+    ): IKeyValueStream<StreamType, null> {
+        return new KeyValueStream<StoredData, null>(
             streamifyDictionary(this.implementation)
         ).mapRaw<StreamType>((entry, entryName) => callback(entry, entryName))
     }
     public toKeysStream(
-    ): Stream<string, boolean, null> {
-        return new Stream((_limiter, onData, onEnd) => {
-            //FIX implement limiter and abort
-            const keys = Object.keys(this.implementation)
-            let index = 0
-            function processNext() {
-                if (index < keys.length) {
-                    const key = keys[index]
-                    const result = onData(key)
-                    function handleResult(abort: boolean) {
-                        if (abort) {
-                            onEnd(true, null)
-                        } else {
-                            processNext()
-                        }
-                    }
-                    if (typeof result === "boolean") {
-                        handleResult(result)
-                    } else {
-                        handleDataOrPromise(result, promiseResult => {
-                            handleResult(promiseResult)
-                        })
-                    }
-                    index += 1
-                    processNext()
-                } else {
-                    onEnd(false, null)
-                }
-
-            }
-            processNext()
-            index += 1
-        })
+    ): IStream<string, null> {
+        return streamifyArray(Object.keys(this.implementation))
     }
     public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
         return {
-            getEntry: (entryName: string): UnsafePromise<NewType, null> => {
-                return new UnsafePromise<NewType, null>((onError, onSuccess) => {
+            getEntry: (entryName: string): UnsafeValue<NewType, null> => {
+                return new UnsafeValue<NewType, null>((onError, onSuccess) => {
                     const entry = this.implementation[entryName]
                     if (entry === undefined) {
                         onError(null)
@@ -80,8 +50,8 @@ export class BaseDictionary<StoredData> {
         lookup: api.ISafeLookup<SupportType>,
         resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
         missingEntriesErrorCreator: (errors: BaseDictionary<StoredData>) => NewErrorType
-    ): api.UnsafeDataOrPromise<BaseDictionary<TargetType>, NewErrorType> {
-        return new UnsafePromise<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
+    ): api.IUnsafeValue<BaseDictionary<TargetType>, NewErrorType> {
+        return new UnsafeValue<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
             const resultDictionary: { [key: string]: TargetType } = {}
             const errorDictionary: { [key: string]: StoredData } = {}
             let hasErrors = false
@@ -89,8 +59,7 @@ export class BaseDictionary<StoredData> {
             const keys = Object.keys(this.implementation)
             keys.forEach(key => {
                 const entry = this.implementation[key]
-                handleUnsafeDataOrPromise<SupportType, null>(
-                    lookup.getEntry(key),
+                lookup.getEntry(key).handle(
                     _err => {
                         hasErrors = true
                         errorDictionary[key] = entry
@@ -109,16 +78,16 @@ export class BaseDictionary<StoredData> {
     }
     public reduce<ResultType>(
         initialValue: ResultType,
-         callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.DataOrPromise<ResultType>,
-         ): api.DataOrPromise<ResultType> {
-        return new SafePromise<ResultType>(onResult => {
+        callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.IValue<ResultType>,
+    ): api.IValue<ResultType> {
+        return new Value<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue
             let currentIndex = 0
             while (currentIndex !== keys.length) {
                 const currentKey = keys[currentIndex]
                 const currentEntry = this.implementation[currentKey]
-                handleDataOrPromise(callback(currentValue, currentEntry, currentKey), result => {
+                callback(currentValue, currentEntry, currentKey).handle(result => {
                     currentValue = result
                 })
                 currentIndex += 1

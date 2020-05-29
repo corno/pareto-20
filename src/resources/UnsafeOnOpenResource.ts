@@ -1,6 +1,6 @@
 import * as api from "pareto-api"
-import { ISafePromise, SafeCallerFunction } from "../promises/ISafePromise"
-import { SafePromise, handleDataOrPromise } from "../promises/SafePromise"
+import { IValue, SafeCallerFunction } from "../values/ISafeValue"
+import { Value } from "../values/SafeValue"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { SafeOpenedResource } from "./SafeOpenedResource"
 
@@ -22,35 +22,35 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
     }
 
     public with<ResultType>(
-        onOpenError: (error: OpenError) => api.DataOrPromise<ResultType>,
-        onOpenSuccess: (openReource: ResourceType) => api.DataOrPromise<ResultType>
-    ): ISafePromise<ResultType> {
+        onOpenError: (error: OpenError) => api.IValue<ResultType>,
+        onOpenSuccess: (openReource: ResourceType) => api.IValue<ResultType>
+    ): IValue<ResultType> {
         const newFunc: SafeCallerFunction<ResultType> = onResult => {
             this.openUnsafeOpenableResource(
                 err => {
-                    handleDataOrPromise(onOpenError(err), onResult)
+                    onOpenError(err).handle(onResult)
                 },
                 res => {
-                    handleDataOrPromise(onOpenSuccess(res.resource), onResult)
+                    onOpenSuccess(res.resource).handle(onResult)
                     res.closeSafeOpenedResource()
                 }
             )
         }
-        return new SafePromise<ResultType>(newFunc)
+        return new Value<ResultType>(newFunc)
     }
-    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => api.DataOrPromise<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
+    public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => api.IValue<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {
             this.openFunction(
-                error => handleDataOrPromise( errorConverter(error), res => onOpenError(res)),
+                error => errorConverter(error).handle(res => onOpenError(res)),
                 (resource, closer) => onSuccess(resource, closer)
             )
         })
     }
-    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.DataOrPromise<NewType>): IUnsafeOnOpenResource<NewType, OpenError> {
+    public mapResource<NewType>(resourceConverter: (resource: ResourceType) => api.IValue<NewType>): IUnsafeOnOpenResource<NewType, OpenError> {
         return new UnsafeOnOpenResource<NewType, OpenError>((onOpenError, onSuccess) => {
             this.openFunction(
                 error => onOpenError(error),
-                (resource, closer) => handleDataOrPromise(resourceConverter(resource), res => onSuccess(res, closer))
+                (resource, closer) => resourceConverter(resource).handle(res => onSuccess(res, closer))
             )
         })
     }

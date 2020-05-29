@@ -1,13 +1,13 @@
 
-import { IUnsafePromise} from "./promises/IUnsafePromise"
-import { UnsafePromise} from "./promises/UnsafePromise"
+import { IUnsafeValue} from "./values/IUnsafeValue"
+import { UnsafeValue} from "./values/UnsafeValue"
 
 export function assertNotNull<InputType, ResultType, ErrorType>(
     value: null | InputType,
     onNull: () => ErrorType,
     onNotNull: (value: InputType
-) => ResultType): IUnsafePromise<ResultType, ErrorType> {
-    return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
+) => ResultType): IUnsafeValue<ResultType, ErrorType> {
+    return new UnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
         if (value === null) {
             onError(onNull())
         } else {
@@ -25,8 +25,8 @@ export function onNullableValue<InputType, ResultType>(value: null | InputType, 
 }
 
 
-export function assertTrue<ResultType, ErrorType>(value: boolean, onFalse: () => ErrorType, onTrue: () => ResultType): IUnsafePromise<ResultType, ErrorType> {
-    return new UnsafePromise<ResultType, ErrorType>((onError, onSuccess) => {
+export function assertTrue<ResultType, ErrorType>(value: boolean, onFalse: () => ErrorType, onTrue: () => ResultType): IUnsafeValue<ResultType, ErrorType> {
+    return new UnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
         if (value) {
             onSuccess(onTrue())
         } else {

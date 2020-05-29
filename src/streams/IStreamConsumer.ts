@@ -1,6 +1,6 @@
-import { DataOrPromise } from "pareto-api";
+import * as api from "pareto-api";
 
-export type OnDataReturnValue = DataOrPromise<boolean>
+export type OnDataReturnValue = api.IValue<boolean>
 
 export interface IStreamConsumer<DataType, EndDataType> {
     onData(data: DataType): OnDataReturnValue

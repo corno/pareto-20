@@ -1,6 +1,6 @@
 
 import * as api from "pareto-api"
-import { error, success } from "../promises/UnsafePromise"
+import { error, success } from "../values/UnsafeValue"
 import { ILookup } from "./ILookup"
 
 
@@ -17,7 +17,7 @@ export class BuildableLookup<DataType> implements ILookup<DataType> {
         }
         return entry
     }
-    public getEntry(key: string): api.UnsafeDataOrPromise<DataType, null> {
+    public getEntry(key: string): api.IUnsafeValue<DataType, null> {
         const entry = this.dictionary[key]
         if (entry === undefined) {
             return error(null)

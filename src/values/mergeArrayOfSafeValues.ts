@@ -1,9 +1,9 @@
 import * as api from "pareto-api"
-import { SafePromise, handleDataOrPromise } from "./SafePromise"
+import { Value } from "./SafeValue"
 
-export function mergeArrayOfSafePromises<ResultType>(
-    array: api.DataOrPromise<ResultType>[],
-): SafePromise<ResultType[]> {
+export function mergeArrayOfSafeValues<ResultType>(
+    array: api.IValue<ResultType>[],
+): Value<ResultType[]> {
     let isExecuted = false
     function execute(onResult: (results: ResultType[]) => void) {
         if (isExecuted === true) {
@@ -27,8 +27,7 @@ export function mergeArrayOfSafePromises<ResultType>(
         } else {
             array.forEach((element, index) => {
                 (() => {
-                    handleDataOrPromise(
-                        element,
+                    element.handle(
                         result => {
                             results[index] = result
                             resolvedCount += 1
@@ -39,5 +38,5 @@ export function mergeArrayOfSafePromises<ResultType>(
             })
         }
     }
-    return new SafePromise<ResultType[]>(execute)
+    return new Value<ResultType[]>(execute)
 }

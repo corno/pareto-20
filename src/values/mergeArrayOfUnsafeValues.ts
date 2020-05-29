@@ -1,11 +1,11 @@
 import * as api from "pareto-api"
-import { IUnsafePromise } from "./IUnsafePromise"
-import { UnsafePromise, handleUnsafeDataOrPromise } from "./UnsafePromise"
+import { IUnsafeValue } from "./IUnsafeValue"
+import { UnsafeValue } from "./UnsafeValue"
 
 
-export function mergeArrayOfUnsafePromises<ResultType, ErrorType>(
-    array: api.UnsafeDataOrPromise<ResultType, ErrorType>[]
-): IUnsafePromise<ResultType[], ErrorType[]> {
+export function mergeArrayOfUnsafeValues<ResultType, ErrorType>(
+    array: api.IUnsafeValue<ResultType, ErrorType>[]
+): IUnsafeValue<ResultType[], ErrorType[]> {
     let isExecuted = false
     function execute(onErrors: (errors: ErrorType[]) => void, onSuccess: (results: ResultType[]) => void) {
         if (isExecuted === true) {
@@ -35,8 +35,7 @@ export function mergeArrayOfUnsafePromises<ResultType, ErrorType>(
         } else {
             array.forEach((element, index) => {
                 (() => {
-                    handleUnsafeDataOrPromise(
-                        element,
+                    element.handle(
                         error => {
                             errors.push(error)
                             resolvedCount += 1
@@ -52,5 +51,5 @@ export function mergeArrayOfUnsafePromises<ResultType, ErrorType>(
             })
         }
     }
-    return new UnsafePromise(execute)
+    return new UnsafeValue(execute)
 }

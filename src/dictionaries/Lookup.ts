@@ -1,4 +1,4 @@
-import { UnsafePromise } from "../promises/UnsafePromise"
+import { UnsafeValue } from "../values/UnsafeValue"
 import { ILookup } from "./ILookup"
 
 /**
@@ -9,8 +9,8 @@ export class Lookup<Type> implements ILookup<Type> {
     constructor(dict: { [key: string]: Type }) {
         this.dict = dict
     }
-    public getEntry(entryName: string): UnsafePromise<Type, null>{
-        return new UnsafePromise((onError, onSuccess) => {
+    public getEntry(entryName: string): UnsafeValue<Type, null>{
+        return new UnsafeValue((onError, onSuccess) => {
             const entry = this.dict[entryName]
             if (entry === undefined) {
                 onError(null)
