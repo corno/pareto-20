@@ -55,11 +55,11 @@ export class Stream<DataType, EndDataType>
                     return onData(data)
                 },
                 (aborted, endData) => {
-                    onEnd(aborted, endData).handle(result => {
+                    onEnd(aborted, endData).handle(theResult => {
                         if (aborted) {
                             onError(null)
                         } else {
-                            onResult(result)
+                            onResult(theResult)
                         }
                     })
                 }
