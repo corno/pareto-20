@@ -83,7 +83,7 @@ export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType
 }
 
 //If a Safe Value is required, but the result is already known
-export const result = <ResultType>(res: ResultType): api.IValue<ResultType> => {
+export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
     return new Value(onResult => {
         new Promise(resolve => {
             resolve()

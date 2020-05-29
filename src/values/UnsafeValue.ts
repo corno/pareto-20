@@ -244,7 +244,7 @@ export function wrapUnsafeFunction<ResultType, ErrorType>(
     return new UnsafeValue(func)
 }
 
-export const success = <ResultType, ErrorType>(res: ResultType): api.IUnsafeValue<ResultType, ErrorType> => {
+export const success = <ResultType, ErrorType>(res: ResultType): IUnsafeValue<ResultType, ErrorType> => {
     //the result is a direct value, no promise
     //it is wrapped in a native promise and immediately called because if there is a large array of values
     //the promises cannot be handled with a forEach loop. They have to be called recursively. But if a large array
@@ -261,7 +261,7 @@ export const success = <ResultType, ErrorType>(res: ResultType): api.IUnsafeValu
     })
 }
 
-export const error = <ResultType, ErrorType>(err: ErrorType): api.IUnsafeValue<ResultType, ErrorType> => {
+export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafeValue<ResultType, ErrorType> => {
     return new UnsafeValue((onError, _onSucces) => {
         //the error is a direct value, no promise
         //it is wrapped in a native promise and immediately called because if there is a large array of values
