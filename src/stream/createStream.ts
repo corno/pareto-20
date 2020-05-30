@@ -42,11 +42,11 @@ class Stream<DataType, EndDataType>
     //     })
     // }
 
-    processStreamToUnsafeValue<ResultType>(
+    toUnsafeValue<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
         onData: (data: DataType) => api.IValue<boolean>, //
-        onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>
-    ): IUnsafeValue<ResultType, null> {
+        onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
+    ): IUnsafeValue<ResultType, ErrorType> {
         return createUnsafeValue((onError, onResult) => {
 
             this.handle(
@@ -55,13 +55,14 @@ class Stream<DataType, EndDataType>
                     return onData(data)
                 },
                 (aborted, endData) => {
-                    onEnd(aborted, endData).handle(theResult => {
-                        if (aborted) {
-                            onError(null)
-                        } else {
+                    return onEnd(aborted, endData).handle(
+                        theError => {
+                            onError(theError)
+                        },
+                        theResult => {
                             onResult(theResult)
                         }
-                    })
+                    )
                 }
             )
         })
@@ -69,7 +70,7 @@ class Stream<DataType, EndDataType>
     public map<NewDataType>(convert: (data: DataType) => api.IValue<NewDataType>): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             let endDataX: EndDataType
-            return this.processStreamToUnsafeValue(
+            return this.toUnsafeValue(
                 newLimiter,
                 data => {
                     return wrap.Value(convert(data)).mapResult(firstResult => {
