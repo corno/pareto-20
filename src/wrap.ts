@@ -1,14 +1,14 @@
 import * as api from "pareto-api"
 
-import { IValue } from "./values/ISafeValue"
-import { IUnsafeValue } from "./values/IUnsafeValue"
-import { Value } from "./values/SafeValue"
-import { UnsafeValue } from "./values/UnsafeValue"
+import { IValue } from "./value/ISafeValue"
+import { IUnsafeValue } from "./value/IUnsafeValue"
+import { Value } from "./value/SafeValue"
+import { UnsafeValue } from "./value/UnsafeValue"
 
-import { IKeyValueStream } from "./streams/IKeyValueStream"
-import { IStream } from "./streams/IStream"
-import { KeyValueStream } from "./streams/KeyValueStream"
-import { Stream } from "./streams/Stream"
+import { IKeyValueStream } from "./stream/IKeyValueStream"
+import { IStream } from "./stream/IStream"
+import { KeyValueStream } from "./stream/KeyValueStream"
+import { Stream } from "./stream/Stream"
 
 function assertUnreachable<RT>(_x: never): RT {
     throw new Error("unreachable")

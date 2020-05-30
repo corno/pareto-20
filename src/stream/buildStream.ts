@@ -1,7 +1,7 @@
 import { BuildableStream } from "./BuildableStream"
 import { IStream } from "./IStream"
 import { IStreamBuilder } from "./IStreamBuilder"
-import { result } from "../values/SafeValue"
+import { result } from "../value/SafeValue"
 
 /**
  * callback wrapper for the IStreamBuilder.

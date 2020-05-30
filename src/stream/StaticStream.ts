@@ -1,5 +1,5 @@
 import { Stream } from "./Stream"
-import { streamifyArray } from "./streamifyArray"
+import { createArray } from "../array/Array"
 
 export class StaticStream<DataType> extends Stream<DataType, null> {
     constructor(array: DataType[]) {
@@ -8,7 +8,7 @@ export class StaticStream<DataType> extends Stream<DataType, null> {
             onData,
             onEnd,
         ) => {
-            return streamifyArray(array).handle(
+            return createArray(array).streamify().handle(
                 limiter,
                 data => {
                     return onData(data)

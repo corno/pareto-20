@@ -1,6 +1,6 @@
-import { IStreamConsumer } from "./IStreamConsumer"
+import { IStreamConsumer } from "../stream/IStreamConsumer"
 import { StreamLimiter } from "pareto-api"
-import { streamifyArray } from "./streamifyArray"
+import { createArray } from "./Array"
 
 export function streamifyArrayToConsumer<DataType, EndDataType>(
     array: DataType[],
@@ -8,9 +8,9 @@ export function streamifyArrayToConsumer<DataType, EndDataType>(
     limiter: StreamLimiter,
     streamConsumer: IStreamConsumer<DataType, EndDataType>,
 ): void {
-    const stream = streamifyArray(
+    const stream = createArray(
         array,
-    )
+    ).streamify()
     return stream.handle(
         limiter,
         data => {

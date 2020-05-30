@@ -1,11 +1,11 @@
 import * as api from "pareto-api"
-import { Value } from "../values/SafeValue"
-import { UnsafeValue } from "../values/UnsafeValue"
-import { KeyValueStream } from "../streams/KeyValueStream"
-import { streamifyDictionary } from "../streams/streamifyDictionary"
+import { Value } from "../value/SafeValue"
+import { UnsafeValue } from "../value/UnsafeValue"
+import { KeyValueStream } from "../stream/KeyValueStream"
+import { streamifyDictionary } from "../stream/streamifyDictionary"
 import { ILookup } from "./ILookup"
-import { IKeyValueStream } from "../streams/IKeyValueStream"
-import { streamifyArray } from "../streams/streamifyArray"
+import { IKeyValueStream } from "../stream/IKeyValueStream"
+import { createArray } from "../array/Array"
 import { IStream } from "pareto-api"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
@@ -30,7 +30,7 @@ export class BaseDictionary<StoredData> {
     }
     public toKeysStream(
     ): IStream<string, null> {
-        return streamifyArray(Object.keys(this.implementation))
+        return createArray(Object.keys(this.implementation)).streamify()
     }
     public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
         return {

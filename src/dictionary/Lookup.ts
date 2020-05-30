@@ -1,4 +1,4 @@
-import { UnsafeValue } from "../values/UnsafeValue"
+import { UnsafeValue } from "../value/UnsafeValue"
 import { ILookup } from "./ILookup"
 
 /**

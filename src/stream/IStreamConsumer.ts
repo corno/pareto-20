@@ -1,6 +1,6 @@
-import * as api from "pareto-api";
+import { IValue } from "../value/ISafeValue";
 
-export type OnDataReturnValue = api.IValue<boolean>
+export type OnDataReturnValue = IValue<boolean>
 
 export interface IStreamConsumer<DataType, EndDataType> {
     onData(data: DataType): OnDataReturnValue

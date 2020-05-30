@@ -1,17 +1,15 @@
 
-import { Stream } from "./Stream"
+import { Stream } from "../stream/Stream"
 import * as api from "pareto-api"
-import { result } from "../values/SafeValue"
+import { result } from "../value/SafeValue"
 import { wrap } from "../wrap"
-import { IStream } from "./IStream"
-//import * as fs from "fs"
+import { IStream } from "../stream/IStream"
 
-// const rs  = fs.createReadStream("./foo.txt", {encoding: "utf-8"})
-// rs.on("data", data => {
-//     console.log(data)
-// })
-// rs.on("end")
+interface IArray<ElementType> {
 
+    streamify(
+    ): IStream<ElementType, null>
+}
 type State = {
     index: number
     mustAbort: boolean
@@ -72,22 +70,32 @@ function pushData<ElementType>(
 
 }
 
-export function streamifyArray<ElementType>(
-    array: ElementType[],
-): IStream<ElementType, null> {
-    return new Stream((
-        limiter: null | api.StreamLimiter,
-        onData: (data: ElementType) => api.IValue<boolean>,
-        onEnd: (aborted: boolean, endData: null) => void
-    ): void => {
-        if (limiter !== null && limiter.maximum < array.length) {
-            if (limiter.abortEarly) {
-                onEnd(true, null)
+
+class MyArray<ElementType> implements IArray<ElementType> {
+    private readonly imp: ElementType[]
+    constructor(raw: ElementType[]) {
+        this.imp = raw
+    }
+    public streamify(
+    ): IStream<ElementType, null> {
+        return new Stream((
+            limiter: null | api.StreamLimiter,
+            onData: (data: ElementType) => api.IValue<boolean>,
+            onEnd: (aborted: boolean, endData: null) => void
+        ): void => {
+            if (limiter !== null && limiter.maximum < this.imp.length) {
+                if (limiter.abortEarly) {
+                    onEnd(true, null)
+                } else {
+                    pushData(this.imp.slice(0, limiter.maximum), onData, onEnd, true)
+                }
             } else {
-                pushData(array.slice(0, limiter.maximum), onData, onEnd, true)
+                pushData(this.imp, onData, onEnd, false)
             }
-        } else {
-            pushData(array, onData, onEnd, false)
-        }
-    })
+        })
+    }
+}
+
+export function createArray<Type>(raw: Type[]): IArray<Type> {
+    return new MyArray(raw)
 }

@@ -1,6 +1,6 @@
 import * as api from "pareto-api"
-import { IValue, SafeCallerFunction } from "../values/ISafeValue"
-import { Value } from "../values/SafeValue"
+import { IValue, SafeCallerFunction } from "../value/ISafeValue"
+import { Value } from "../value/SafeValue"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { SafeOpenedResource } from "./SafeOpenedResource"
 

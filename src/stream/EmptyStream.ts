@@ -1,5 +1,5 @@
 import { Stream } from "./Stream"
-import { streamifyArray } from "./streamifyArray"
+import { createArray } from "../array/Array"
 
 /**
  * can be used to avoid having to initialize a stream with an empty array: []
@@ -11,7 +11,7 @@ export class EmptyStream<DataType> extends Stream<DataType, null> {
             onData,
             onEnd,
         ) => {
-            return streamifyArray([]).handle(
+            return createArray([]).streamify().handle(
                 limiter,
                 data => {
                     return onData(data)

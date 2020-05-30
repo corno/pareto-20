@@ -1,6 +1,6 @@
 
 //import { assert } from "chai"
-import { buildStream } from "../src/streams/buildStream"
+import { buildStream } from "../src/stream/buildStream"
 
 describe("buildStream", () => {
     it("write behaviour", () => {

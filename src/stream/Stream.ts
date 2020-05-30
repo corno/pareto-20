@@ -1,9 +1,9 @@
 import * as api from "pareto-api"
 import { IStream } from "./IStream"
 import { wrap } from "../wrap"
-import { result } from "../values/SafeValue"
-import { success, error, UnsafeValue } from "../values/UnsafeValue"
-import { IUnsafeValue } from "../values/IUnsafeValue"
+import { result } from "../value/SafeValue"
+import { success, error, UnsafeValue } from "../value/UnsafeValue"
+import { IUnsafeValue } from "../value/IUnsafeValue"
 //import { IUnsafeValue } from "../values/IUnsafeValue"
 
 // export type HandleStreamFunction<Data, EndData> = (
@@ -215,4 +215,43 @@ export class Stream<DataType, EndDataType>
     //         )
     //     })
     // }
+    public mergeUnsafeValues<DataType, ReturnType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+        _limiter: null | api.StreamLimiter,
+        _onData: (entry: DataType) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
+        _createError: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => ErrorType,
+    ): IUnsafeValue<IStream<TargetType, EndDataType>, ErrorType> {
+        throw new Error("IMPLEMENT ME")
+        // return new UnsafePromise<IStream<TargetType, EndDataType>, ErrorType>((onError, onSuccess) => {
+        //     let hasErrors = false
+        //     const errors: IntermediateErrorType[] = []
+        //     const results: TargetType[] = []
+        //     stream.handle(
+        //         limiter,
+        //         data => {
+        //             const rv = onData(
+        //                 data
+        //             )
+        //             return wrap.UnsafePromise(rv[0]).reworkAndCatch(
+        //                 error => {
+        //                     hasErrors = true
+        //                     errors.push(error)
+        //                     return result(rv[1])
+        //                 },
+        //                 theResult => {
+        //                     results.push(theResult)
+        //                     return result(rv[1])
+        //                 }
+        //             )
+        //         },
+        //         (aborted, endData) => {
+        //             if (hasErrors) {
+        //                 onError(createError(aborted, new StaticStream(errors).mapEndData(() => result(endData))))
+        //             } else {
+        //                 onSuccess(new StaticStream(results).mapEndData(() => result( endData)))
+        //             }
+        //         }
+        //     )
+        // })
+
+    }
 }

@@ -1,6 +1,6 @@
 
-import { IUnsafeValue} from "./values/IUnsafeValue"
-import { UnsafeValue} from "./values/UnsafeValue"
+import { IUnsafeValue} from "./value/IUnsafeValue"
+import { UnsafeValue} from "./value/UnsafeValue"
 
 export function assertNotNull<InputType, ResultType, ErrorType>(
     value: null | InputType,

@@ -1,6 +1,6 @@
 import { IStreamBuilder } from "./IStreamBuilder"
 import { Stream } from "./Stream"
-import { streamifyArray } from "./streamifyArray"
+import { createArray } from "../array/Array"
 
 /**
  * Allows for the creation of a stream that can be incrementally built with the push function.
@@ -12,7 +12,7 @@ export class BuildableStream<DataType> extends Stream<DataType, null> implements
         const array: DataType[] = []
 
         super((limiter, onData, onEnd) => {
-            return streamifyArray(array).handle(
+            return createArray(array).streamify().handle(
                 limiter,
                 data => {
                     return onData(data)

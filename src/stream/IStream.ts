@@ -1,5 +1,5 @@
 import * as api from "pareto-api"
-import { IUnsafeValue } from "../values/IUnsafeValue"
+import { IUnsafeValue } from "../value/IUnsafeValue"
 //import { ISafePromise } from "../promises/ISafePromise"
 //import { IUnsafePromise } from "../promises/IUnsafePromise"
 
@@ -43,4 +43,9 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
     //         errors: IStream<IntermediateErrorType, EndDataType>
     //     }
     // >
+    mergeUnsafeValues<DataType, ReturnType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+        _limiter: null | api.StreamLimiter,
+        _onData: (entry: DataType) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
+        _createError: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => ErrorType,
+    ): IUnsafeValue<IStream<TargetType, EndDataType>, ErrorType>
 }

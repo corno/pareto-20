@@ -2,7 +2,7 @@
     "@typescript-eslint/no-empty-interface": off
 */
 import * as api from "pareto-api"
-import { IValue } from "../values/ISafeValue"
+import { IValue } from "../value/ISafeValue"
 
 /**
  * a resource that can throw errors on opening but not on closing
