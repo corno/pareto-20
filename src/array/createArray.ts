@@ -1,10 +1,13 @@
 
 import { IStream } from "../stream/IStream"
 import * as api from "pareto-api"
-import { result } from "../value/createSafeValue"
+import { result, createSafeValue } from "../value/createSafeValue"
 import { wrap } from "../wrap"
 import { createStream } from "../stream/createStream"
 import { IArray } from "./IArray"
+import { IValue } from "../value/ISafeValue"
+import { IUnsafeValue } from "../value/IUnsafeValue"
+import { createUnsafeValue } from "../value/createUnsafeValue"
 
 type State = {
     index: number
@@ -89,6 +92,95 @@ class MyArray<ElementType> implements IArray<ElementType> {
                 pushData(this.imp, onData, onEnd, false)
             }
         })
+    }
+    public mergeSafeValues<ResultType>(
+        callback: (element: ElementType) => IValue<ResultType>,
+    ): IValue<ResultType[]> {
+        let isExecuted = false
+        const execute = (onResult: (results: ResultType[]) => void) => {
+            if (isExecuted === true) {
+                throw new Error("all promise is already executed")
+            }
+            isExecuted = true
+            let resolvedCount = 0
+            const results: ResultType[] = []
+
+            const wrapup = () => {
+
+                if (resolvedCount > this.imp.length) {
+                    throw new Error("promises are called back more than once")
+                }
+                if (resolvedCount === this.imp.length) {
+                    onResult(results)
+                }
+            }
+            if (this.imp.length === 0) {
+                wrapup()
+            } else {
+                this.imp.forEach((element, index) => {
+                    (() => {
+                        callback(element).handle(
+                            theResult => {
+                                results[index] = theResult
+                                resolvedCount += 1
+                                wrapup()
+                            }
+                        )
+                    })()
+                })
+            }
+        }
+        return createSafeValue<ResultType[]>(execute)
+    }
+    public mergeUnsafeValues<ResultType, ErrorType>(
+        callback: (element: ElementType) => IUnsafeValue<ResultType, ErrorType>,
+    ): IUnsafeValue<ResultType[], ErrorType[]> {
+        let isExecuted = false
+        const execute = (onErrors: (errors: ErrorType[]) => void, onSuccess: (results: ResultType[]) => void) => {
+            if (isExecuted === true) {
+                throw new Error("all promise is already executed")
+            }
+            isExecuted = true
+            let resolvedCount = 0
+            const results: ResultType[] = []
+            const errors: ErrorType[] = []
+
+            const wrapup = () => {
+
+                if (resolvedCount > this.imp.length) {
+                    const err = new Error("promises are called back more than once")
+                    throw err
+                }
+                if (resolvedCount === this.imp.length) {
+                    if (errors.length > 0) {
+                        onErrors(errors)
+                    } else {
+                        onSuccess(results)
+                    }
+                }
+            }
+            if (this.imp.length === 0) {
+                wrapup()
+            } else {
+                this.imp.forEach((element, index) => {
+                    (() => {
+                        callback(element).handle(
+                            error => {
+                                errors.push(error)
+                                resolvedCount += 1
+                                wrapup()
+                            },
+                            theResult => {
+                                results[index] = theResult
+                                resolvedCount += 1
+                                wrapup()
+                            }
+                        )
+                    })()
+                })
+            }
+        }
+        return createUnsafeValue(execute)
     }
 }
 
