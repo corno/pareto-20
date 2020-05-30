@@ -9,7 +9,7 @@ import { IKeyValueStream } from "./IKeyValueStream"
 // import { wrap } from "../wrap"
 // import { FilterResult } from "./IStream"
 
-export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType, EndDataType> {
+class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType, EndDataType> {
     public readonly handle: api.ProcessKeyValueStreamFunction<DataType, EndDataType>
     constructor(
         processStreamFunction: api.ProcessKeyValueStreamFunction<DataType, EndDataType>,
@@ -154,4 +154,13 @@ export class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<Da
     //         )
     //     })
     // }
+}
+
+export function createKeyValueStream<DataType, EndDataType>(
+    processStreamFunction: api.ProcessKeyValueStreamFunction<DataType, EndDataType>,
+
+): IKeyValueStream<DataType, EndDataType> {
+    return new KeyValueStream(
+        processStreamFunction
+    )
 }

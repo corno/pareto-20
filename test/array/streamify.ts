@@ -1,5 +1,5 @@
 import * as chai from "chai"
-import * as sa from "../../src/array/Array"
+import * as sa from "../../src/array/createArray"
 import { wrapSafeFunction, result, wrap } from "../../src"
 
 

@@ -1,26 +1,28 @@
 import { IUnsafeResource } from "./IUnsafeResource"
-import { UnsafeOnOpenResource } from "./UnsafeOnOpenResource"
-import { UnsafeOpenedResource } from "./UnsafeOpenedResource"
+import { createUnsafeOnOpenResource } from "./createUnsafeOnOpenResource"
+import { createUnsafeOpenedResource } from "./createUnsafeOpenedResource"
+import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
+import { IUnsafeOpenedResource } from "./IUnsafeOpenedResource"
 
-export class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeResource<ResourceType, OpenError, CloseError> {
+class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeResource<ResourceType, OpenError, CloseError> {
     private readonly openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>
     constructor(openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>) {
         this.openFunction = openFunction
     }
     public openUnsafeOpenableResource(
         onError: (openError: OpenError) => void,
-        onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void
+        onOpened: (openedResource: IUnsafeOpenedResource<ResourceType, CloseError>) => void
     ): void {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: (onCloseError: (closeError: CloseError) => void) => void) => {
-                onOpened(new UnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
+                onOpened(createUnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
             }
         )
     }
 
-    public suppressCloseError(closeErrorHandler: (error: CloseError) => void): UnsafeOnOpenResource<ResourceType, OpenError> {
-        return new UnsafeOnOpenResource((onOpenError, onSuccess) => {
+    public suppressCloseError(closeErrorHandler: (error: CloseError) => void): IUnsafeOnOpenResource<ResourceType, OpenError> {
+        return createUnsafeOnOpenResource((onOpenError, onSuccess) => {
             this.openUnsafeOpenableResource(
                 onOpenError,
                 success => onSuccess(
@@ -45,5 +47,11 @@ export type UnsafeFunction<ResultType, OpenError, CloseError> = (
 export function wrapUnsafeResource<ResourceType, OpenError, CloseError>(
     openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>
 ): UnsafeResource<ResourceType, OpenError, CloseError> {
+    return new UnsafeResource(openFunction)
+}
+
+export function createUnsafeResource<ResourceType, OpenError, CloseError>(
+    openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>
+): IUnsafeResource<ResourceType, OpenError, CloseError> {
     return new UnsafeResource(openFunction)
 }

@@ -2,9 +2,9 @@
     "max-classes-per-file": off
 */
 import * as api from "pareto-api"
-import { error, success, wrapUnsafePromise } from "../value/UnsafeValue"
-import { Stream } from "../stream/Stream"
-import { createArray } from "../array/Array"
+import { error, success, wrapUnsafePromise } from "../value/createUnsafeValue"
+import { IStream } from "../stream/IStream"
+import { createArray } from "../array/createArray"
 import { BaseDictionary } from "./BaseDictionary"
 
 export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, CustomErrorType> extends
@@ -66,7 +66,7 @@ export class IntUnsafeMutableDictionary<StoredData, CreateData, OpenData, Custom
         return success(null)
     }
     public getKeys(
-    ): api.IUnsafeValue<Stream<string, null>, CustomErrorType> {
+    ): api.IUnsafeValue<IStream<string, null>, CustomErrorType> {
         return success(
             createArray(Object.keys(this.implementation)).streamify()
         )

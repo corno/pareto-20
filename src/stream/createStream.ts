@@ -1,8 +1,8 @@
 import * as api from "pareto-api"
 import { IStream } from "./IStream"
 import { wrap } from "../wrap"
-import { result } from "../value/SafeValue"
-import { success, error, UnsafeValue } from "../value/UnsafeValue"
+import { result } from "../value/createSafeValue"
+import { success, error, createUnsafeValue } from "../value/createUnsafeValue"
 import { IUnsafeValue } from "../value/IUnsafeValue"
 //import { IUnsafeValue } from "../values/IUnsafeValue"
 
@@ -12,7 +12,7 @@ import { IUnsafeValue } from "../value/IUnsafeValue"
 //     onEnd: (aborted: boolean, endData: EndData) => api.IValue<null>
 // ) => api.IUnsafeValue<null, null>;
 
-export class Stream<DataType, EndDataType>
+class Stream<DataType, EndDataType>
     implements IStream<DataType, EndDataType> {
     public readonly handle: api.HandleStreamFunction<DataType, EndDataType>
     constructor(
@@ -47,7 +47,7 @@ export class Stream<DataType, EndDataType>
         onData: (data: DataType) => api.IValue<boolean>, //
         onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>
     ): IUnsafeValue<ResultType, null> {
-        return new UnsafeValue((onError, onResult) => {
+        return createUnsafeValue((onError, onResult) => {
 
             this.handle(
                 limiter,
@@ -254,4 +254,10 @@ export class Stream<DataType, EndDataType>
         // })
 
     }
+}
+
+export function createStream<DataType, EndDataType>(
+    handleStreamFunction: api.HandleStreamFunction<DataType, EndDataType>,
+): IStream<DataType, EndDataType> {
+    return new Stream(handleStreamFunction)
 }

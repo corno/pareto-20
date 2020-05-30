@@ -1,7 +1,7 @@
 import { BuildableStream } from "./BuildableStream"
 import { IStream } from "./IStream"
 import { IStreamBuilder } from "./IStreamBuilder"
-import { result } from "../value/SafeValue"
+import { result } from "../value/createSafeValue"
 
 /**
  * callback wrapper for the IStreamBuilder.
@@ -13,5 +13,5 @@ export function buildStream<DataType, EndDataType>(
 ): IStream<DataType, EndDataType> {
     const builder = new BuildableStream<DataType>()
     buildCallback(builder)
-    return builder.mapEndData(() => result(endData))
+    return builder.stream.mapEndData(() => result(endData))
 }

@@ -1,9 +1,9 @@
 import * as api from "pareto-api"
 import { IValue, SafeCallerFunction } from "./ISafeValue"
 import { IUnsafeValue } from "./IUnsafeValue"
-import { UnsafeValue } from "./UnsafeValue"
+import { createUnsafeValue } from "./createUnsafeValue"
 
-export class Value<T> implements IValue<T> {
+class Value<T> implements IValue<T> {
     private readonly callerFunction: SafeCallerFunction<T>
     private isCalled = false
     constructor(callerFunction: SafeCallerFunction<T>) {
@@ -60,7 +60,7 @@ export class Value<T> implements IValue<T> {
      * @param callback
      */
     public try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafeValue<ResultType, ErrorType>): IUnsafeValue<ResultType, ErrorType> {
-        return new UnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
+        return createUnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
             this.handle(res => {
                 callback(res).handle(onError, onSuccess)
             })
@@ -79,12 +79,12 @@ export class Value<T> implements IValue<T> {
 }
 
 export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): IValue<ResultType> {
-    return new Value(func)
+    return createSafeValue(func)
 }
 
 //If a Safe Value is required, but the result is already known
 export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
-    return new Value(onResult => {
+    return createSafeValue(onResult => {
         new Promise(resolve => {
             resolve()
         }).then(() => {
@@ -93,4 +93,8 @@ export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
             //
         })
     })
+}
+
+export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>) : IValue<Type> {
+    return new Value(callerFunction)
 }

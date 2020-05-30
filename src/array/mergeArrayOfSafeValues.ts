@@ -1,9 +1,10 @@
 import * as api from "pareto-api"
-import { Value } from "./SafeValue"
+import { createSafeValue } from "../value/createSafeValue"
+import { IValue } from "../value/ISafeValue"
 
 export function mergeArrayOfSafeValues<ResultType>(
     array: api.IValue<ResultType>[],
-): Value<ResultType[]> {
+): IValue<ResultType[]> {
     let isExecuted = false
     function execute(onResult: (results: ResultType[]) => void) {
         if (isExecuted === true) {
@@ -38,5 +39,5 @@ export function mergeArrayOfSafeValues<ResultType>(
             })
         }
     }
-    return new Value<ResultType[]>(execute)
+    return createSafeValue<ResultType[]>(execute)
 }

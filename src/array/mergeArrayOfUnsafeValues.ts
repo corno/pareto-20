@@ -1,6 +1,6 @@
 import * as api from "pareto-api"
-import { IUnsafeValue } from "./IUnsafeValue"
-import { UnsafeValue } from "./UnsafeValue"
+import { IUnsafeValue } from "../value/IUnsafeValue"
+import { createUnsafeValue } from "../value/createUnsafeValue"
 
 
 export function mergeArrayOfUnsafeValues<ResultType, ErrorType>(
@@ -51,5 +51,5 @@ export function mergeArrayOfUnsafeValues<ResultType, ErrorType>(
             })
         }
     }
-    return new UnsafeValue(execute)
+    return createUnsafeValue(execute)
 }

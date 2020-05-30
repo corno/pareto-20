@@ -1,20 +1,21 @@
 import * as api from "pareto-api"
 import { ISafeResource } from "./ISafeResource"
 import { IUnsafeOnCloseResource } from "./IUnsafeOnCloseResource"
-import { SafeResource } from "./SafeResource"
-import { UnsafeOnCloseFunction, UnsafeOpenedResource } from "./UnsafeOpenedResource"
+import { createSafeResource } from "./createSafeResource"
+import { UnsafeOnCloseFunction, createUnsafeOpenedResource } from "./createUnsafeOpenedResource"
+import { IUnsafeOpenedResource } from "./IUnsafeOpenedResource"
 
-export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseResource<ResourceType, CloseError> {
+class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseResource<ResourceType, CloseError> {
     private readonly openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>
     constructor(openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>) {
         this.openFunction = openFunction
     }
     public openSafeOpenableResource(
-        onOpened: (openedResource: UnsafeOpenedResource<ResourceType, CloseError>) => void
+        onOpened: (openedResource: IUnsafeOpenedResource<ResourceType, CloseError>) => void
     ): void {
         this.openFunction(
             (resource: ResourceType, closer: (onError: (error: CloseError) => void) => void) => {
-                onOpened(new UnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
+                onOpened(createUnsafeOpenedResource<ResourceType, CloseError>(resource, closer))
             }
         )
     }
@@ -35,7 +36,7 @@ export class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeO
         })
     }
     public suppressCloseError(closeErrorHandler: (error: CloseError) => void): ISafeResource<ResourceType> {
-        return new SafeResource<ResourceType>(onOpened => {
+        return createSafeResource<ResourceType>(onOpened => {
             this.openSafeOpenableResource(
                 success => onOpened(
                     success.resource,

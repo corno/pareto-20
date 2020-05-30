@@ -1,6 +1,6 @@
 import { IUnsafeOpenedResource } from "./IUnsafeOpenedResource"
 
-export class UnsafeOpenedResource<ResourceType, CloseError> implements IUnsafeOpenedResource<ResourceType, CloseError> {
+class UnsafeOpenedResource<ResourceType, CloseError> implements IUnsafeOpenedResource<ResourceType, CloseError> {
     public readonly resource: ResourceType
     private readonly closer: (onCloseError: (error: CloseError) => void) => void
     constructor(resource: ResourceType, closer: (onCloseError: (error: CloseError) => void) => void) {
@@ -18,3 +18,10 @@ export type UnsafeOnCloseFunction<ResultType, CloseError> = (
         close: (onError: (error: CloseError) => void) => void
     ) => void
 ) => void
+
+export function createUnsafeOpenedResource<ResourceType, CloseError>(
+    resource: ResourceType,
+    closer: (onCloseError: (error: CloseError) => void) => void
+): IUnsafeOpenedResource<ResourceType, CloseError> {
+    return new UnsafeOpenedResource(resource, closer)
+}

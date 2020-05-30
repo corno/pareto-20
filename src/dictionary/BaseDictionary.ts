@@ -1,12 +1,13 @@
 import * as api from "pareto-api"
-import { Value } from "../value/SafeValue"
-import { UnsafeValue } from "../value/UnsafeValue"
-import { KeyValueStream } from "../stream/KeyValueStream"
+import { createSafeValue } from "../value/createSafeValue"
+import { createUnsafeValue } from "../value/createUnsafeValue"
+import { createKeyValueStream } from "../stream/createKeyValueStream"
 import { streamifyDictionary } from "../stream/streamifyDictionary"
 import { ILookup } from "./ILookup"
 import { IKeyValueStream } from "../stream/IKeyValueStream"
-import { createArray } from "../array/Array"
+import { createArray } from "../array/createArray"
 import { IStream } from "pareto-api"
+import { IUnsafeValue } from "../value/IUnsafeValue"
 
 // function arrayToDictionary<Type>(array: Type[], keys: string[]) {
 //     const dictionary: { [key: string]: Type } = {}
@@ -24,7 +25,7 @@ export class BaseDictionary<StoredData> {
     public toStream<StreamType>(
         callback: (entry: StoredData, entryName: string) => StreamType,
     ): IKeyValueStream<StreamType, null> {
-        return new KeyValueStream<StoredData, null>(
+        return createKeyValueStream<StoredData, null>(
             streamifyDictionary(this.implementation)
         ).mapRaw<StreamType>((entry, entryName) => callback(entry, entryName))
     }
@@ -34,8 +35,8 @@ export class BaseDictionary<StoredData> {
     }
     public toLookup<NewType>(callback: (entry: StoredData, entryName: string) => NewType): ILookup<NewType> {
         return {
-            getEntry: (entryName: string): UnsafeValue<NewType, null> => {
-                return new UnsafeValue<NewType, null>((onError, onSuccess) => {
+            getEntry: (entryName: string): IUnsafeValue<NewType, null> => {
+                return createUnsafeValue<NewType, null>((onError, onSuccess) => {
                     const entry = this.implementation[entryName]
                     if (entry === undefined) {
                         onError(null)
@@ -51,7 +52,7 @@ export class BaseDictionary<StoredData> {
         resultCreator: (main: StoredData, support: SupportType, key: string) => TargetType,
         missingEntriesErrorCreator: (errors: BaseDictionary<StoredData>) => NewErrorType
     ): api.IUnsafeValue<BaseDictionary<TargetType>, NewErrorType> {
-        return new UnsafeValue<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
+        return createUnsafeValue<BaseDictionary<TargetType>, NewErrorType>((onError, onSuccess) => {
             const resultDictionary: { [key: string]: TargetType } = {}
             const errorDictionary: { [key: string]: StoredData } = {}
             let hasErrors = false
@@ -80,7 +81,7 @@ export class BaseDictionary<StoredData> {
         initialValue: ResultType,
         callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.IValue<ResultType>,
     ): api.IValue<ResultType> {
-        return new Value<ResultType>(onResult => {
+        return createSafeValue<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue
             let currentIndex = 0

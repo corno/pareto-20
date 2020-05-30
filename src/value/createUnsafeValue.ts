@@ -1,9 +1,9 @@
 import * as api from "pareto-api"
 import { IValue } from "./ISafeValue"
 import { IUnsafeValue } from "./IUnsafeValue"
-import { result, Value } from "./SafeValue"
+import { result, createSafeValue } from "./createSafeValue"
 
-export class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, ErrorType> {
+class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, ErrorType> {
     private isCalled: boolean
     private readonly callerFunction: UnsafeCallerFunction<ResultType, ErrorType>
     constructor(callerFunction: UnsafeCallerFunction<ResultType, ErrorType>) {
@@ -178,7 +178,7 @@ export class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultTy
      * @param onError if the promise results in an error, this handler is called.
      */
     public catch(onError: (error: ErrorType) => ResultType): IValue<ResultType> {
-        return new Value<ResultType>(onResult => {
+        return createSafeValue<ResultType>(onResult => {
             this.handle(
                 err => {
                     onResult(onError(err))
@@ -200,7 +200,7 @@ export class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultTy
         onError: (error: ErrorType) => api.IValue<NewResultType>,
         onSuccess: (result: ResultType) => api.IValue<NewResultType>
     ): IValue<NewResultType> {
-        return new Value<NewResultType>(onResult => {
+        return createSafeValue<NewResultType>(onResult => {
             this.handle(
                 err => {
                     onError(err).handle(res => onResult(res))
@@ -274,7 +274,8 @@ export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafeValue<Resul
             onError(err)
         }).catch(() => {
             //
-        })    })
+        })
+    })
 }
 
 export function wrapUnsafePromise<SourceResultType, SourceErrorType>(
@@ -283,4 +284,10 @@ export function wrapUnsafePromise<SourceResultType, SourceErrorType>(
     return new UnsafeValue<SourceResultType, SourceErrorType>((onError, onSucces) => {
         promise.handle(onError, onSucces)
     })
+}
+
+export function createUnsafeValue<Type, ErrorType>(
+    callerFunction: UnsafeCallerFunction<Type, ErrorType>
+): IUnsafeValue<Type, ErrorType> {
+    return new UnsafeValue(callerFunction)
 }

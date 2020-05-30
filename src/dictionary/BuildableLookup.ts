@@ -1,6 +1,6 @@
 
 import * as api from "pareto-api"
-import { error, success } from "../value/UnsafeValue"
+import { error, success } from "../value/createUnsafeValue"
 import { ILookup } from "./ILookup"
 
 

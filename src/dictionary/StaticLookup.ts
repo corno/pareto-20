@@ -1,5 +1,5 @@
 
-import { error, success } from "../value/UnsafeValue"
+import { error, success } from "../value/createUnsafeValue"
 import { ILookup } from "./ILookup"
 import * as api from "pareto-api"
 

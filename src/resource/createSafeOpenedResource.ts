@@ -1,6 +1,6 @@
 import { ISafeOpenedResource } from "./ISafeOpenedResource"
 
-export class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<ResourceType> {
+class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<ResourceType> {
     public readonly resource: ResourceType
     private readonly closer: () => void
     constructor(resource: ResourceType, closer: () => void) {
@@ -18,3 +18,13 @@ export type SafeFunction<ResultType> = (
         close: () => void
     ) => void
 ) => void
+
+export function createSafeOpenedResource<ResourceType>(
+    resource: ResourceType,
+    closer: () => void
+): ISafeOpenedResource<ResourceType> {
+    return new SafeOpenedResource(
+        resource,
+        closer,
+    )
+}

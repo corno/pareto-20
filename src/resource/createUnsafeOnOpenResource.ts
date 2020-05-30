@@ -1,22 +1,23 @@
 import * as api from "pareto-api"
 import { IValue, SafeCallerFunction } from "../value/ISafeValue"
-import { Value } from "../value/SafeValue"
+import { createSafeValue } from "../value/createSafeValue"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
-import { SafeOpenedResource } from "./SafeOpenedResource"
+import { ISafeOpenedResource } from "./ISafeOpenedResource"
+import { createSafeOpenedResource } from "./createSafeOpenedResource"
 
-export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenResource<ResourceType, OpenError> {
+class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenResource<ResourceType, OpenError> {
     private readonly openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
     constructor(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
         this.openFunction = openFunction
     }
     public openUnsafeOpenableResource(
         onError: (openError: OpenError) => void,
-        onOpened: (openedResource: SafeOpenedResource<ResourceType>) => void
+        onOpened: (openedResource: ISafeOpenedResource<ResourceType>) => void
     ): void {
         this.openFunction(
             onError,
             (resource: ResourceType, closer: () => void) => {
-                onOpened(new SafeOpenedResource<ResourceType>(resource, closer))
+                onOpened(createSafeOpenedResource<ResourceType>(resource, closer))
             }
         )
     }
@@ -36,7 +37,7 @@ export class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnO
                 }
             )
         }
-        return new Value<ResultType>(newFunc)
+        return createSafeValue<ResultType>(newFunc)
     }
     public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => api.IValue<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {
@@ -67,5 +68,12 @@ export type UnsafeOnOpenFunction<ResultType, OpenError> = (
 export function wrapUnsafeOnOpenResource<ResourceType, OpenError>(
     openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
 ): UnsafeOnOpenResource<ResourceType, OpenError> {
+    return new UnsafeOnOpenResource(openFunction)
+}
+
+
+export function createUnsafeOnOpenResource<ResourceType, OpenError>(
+    openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
+): IUnsafeOnOpenResource<ResourceType, OpenError> {
     return new UnsafeOnOpenResource(openFunction)
 }

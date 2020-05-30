@@ -1,13 +1,13 @@
 
 import { IUnsafeValue} from "./value/IUnsafeValue"
-import { UnsafeValue} from "./value/UnsafeValue"
+import { createUnsafeValue } from "./value/createUnsafeValue"
 
 export function assertNotNull<InputType, ResultType, ErrorType>(
     value: null | InputType,
     onNull: () => ErrorType,
     onNotNull: (value: InputType
 ) => ResultType): IUnsafeValue<ResultType, ErrorType> {
-    return new UnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
+    return createUnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
         if (value === null) {
             onError(onNull())
         } else {
@@ -26,7 +26,7 @@ export function onNullableValue<InputType, ResultType>(value: null | InputType, 
 
 
 export function assertTrue<ResultType, ErrorType>(value: boolean, onFalse: () => ErrorType, onTrue: () => ResultType): IUnsafeValue<ResultType, ErrorType> {
-    return new UnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
+    return createUnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
         if (value) {
             onSuccess(onTrue())
         } else {

@@ -2,13 +2,13 @@ import * as api from "pareto-api"
 
 import { IValue } from "./value/ISafeValue"
 import { IUnsafeValue } from "./value/IUnsafeValue"
-import { Value } from "./value/SafeValue"
-import { UnsafeValue } from "./value/UnsafeValue"
+import { createSafeValue } from "./value/createSafeValue"
+import { createUnsafeValue } from "./value/createUnsafeValue"
 
 import { IKeyValueStream } from "./stream/IKeyValueStream"
 import { IStream } from "./stream/IStream"
-import { KeyValueStream } from "./stream/KeyValueStream"
-import { Stream } from "./stream/Stream"
+import { createKeyValueStream } from "./stream/createKeyValueStream"
+import { createStream } from "./stream/createStream"
 
 function assertUnreachable<RT>(_x: never): RT {
     throw new Error("unreachable")
@@ -36,7 +36,7 @@ export const wrap = {
         switch (onKeyConflict[0]) {
             case "abort": {
                 const keys: { [key: string]: null } = {}
-                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
+                return createKeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
                     return stream.handle(
                         limiter,
                         data => {
@@ -50,7 +50,7 @@ export const wrap = {
                 })
             }
             case "ignore": {
-                return new KeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
+                return createKeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
                     return stream.handle(limiter, onData, onEnd)
                 })
             }
@@ -60,12 +60,12 @@ export const wrap = {
         }
     },
     Value: <SourceResultType>(promise: api.IValue<SourceResultType>): IValue<SourceResultType> => {
-        return new Value<SourceResultType>(onResult => {
+        return createSafeValue<SourceResultType>(onResult => {
             promise.handle(onResult)
         })
     },
     UnsafeValue: <SourceResultType, SourceErrorType>(value: api.IUnsafeValue<SourceResultType, SourceErrorType>): IUnsafeValue<SourceResultType, SourceErrorType> => {
-        return new UnsafeValue<SourceResultType, SourceErrorType>((onError, onSucces) => {
+        return createUnsafeValue<SourceResultType, SourceErrorType>((onError, onSucces) => {
             value.handle(onError, onSucces)
         })
     },
@@ -106,7 +106,7 @@ export const wrap = {
     //     })
     // },
     Stream: <DataType, EndDataType>(stream: api.IStream<DataType, EndDataType>): IStream<DataType, EndDataType> => {
-        return new Stream<DataType, EndDataType>((limiter, onData, onEnd) => {
+        return createStream<DataType, EndDataType>((limiter, onData, onEnd) => {
             return stream.handle(limiter, onData, onEnd)
         })
     },

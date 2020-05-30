@@ -1,15 +1,11 @@
 
-import { Stream } from "../stream/Stream"
-import * as api from "pareto-api"
-import { result } from "../value/SafeValue"
-import { wrap } from "../wrap"
 import { IStream } from "../stream/IStream"
+import * as api from "pareto-api"
+import { result } from "../value/createSafeValue"
+import { wrap } from "../wrap"
+import { createStream } from "../stream/createStream"
+import { IArray } from "./IArray"
 
-interface IArray<ElementType> {
-
-    streamify(
-    ): IStream<ElementType, null>
-}
 type State = {
     index: number
     mustAbort: boolean
@@ -78,7 +74,7 @@ class MyArray<ElementType> implements IArray<ElementType> {
     }
     public streamify(
     ): IStream<ElementType, null> {
-        return new Stream((
+        return createStream((
             limiter: null | api.StreamLimiter,
             onData: (data: ElementType) => api.IValue<boolean>,
             onEnd: (aborted: boolean, endData: null) => void
