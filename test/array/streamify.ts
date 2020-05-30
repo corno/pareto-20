@@ -37,7 +37,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
 
     return wrap.UnsafeValue(sa.createArray(
         theArray,
-    ).streamify().processStream2(
+    ).streamify().processStreamToUnsafeValue(
         null,
         data => {
             //console.log(data)

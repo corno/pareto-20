@@ -12,7 +12,7 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
     //     onAborted: (() => void) | null,
     // ): api.IUnsafeValue<DataType[], null>
 
-    processStream2<ResultType>(
+    processStreamToUnsafeValue<ResultType>(
         limiter: api.StreamLimiter,
         onData: (data: DataType) => api.IValue<boolean>, //
         onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>

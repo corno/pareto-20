@@ -42,7 +42,7 @@ class Stream<DataType, EndDataType>
     //     })
     // }
 
-    processStream2<ResultType>(
+    processStreamToUnsafeValue<ResultType>(
         limiter: api.StreamLimiter,
         onData: (data: DataType) => api.IValue<boolean>, //
         onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>
@@ -69,7 +69,7 @@ class Stream<DataType, EndDataType>
     public map<NewDataType>(convert: (data: DataType) => api.IValue<NewDataType>): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
             let endDataX: EndDataType
-            return this.processStream2(
+            return this.processStreamToUnsafeValue(
                 newLimiter,
                 data => {
                     return wrap.Value(convert(data)).mapResult(firstResult => {
