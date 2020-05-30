@@ -18,14 +18,14 @@ describe("stringfyArray", () => {
     })
     it("sync large", () => {
         const theArray: number[] = []
-        for (let i = 0; i !== 3000000; i += 1) {
+        for (let i = 0; i !== 300000; i += 1) {
             theArray.push(i)
         }
         return testStreamifiedArray(null, theArray, null, theArray)
     })
     it("async large", () => {
         const theArray: number[] = []
-        for (let i = 0; i !== 3000000; i += 1) {
+        for (let i = 0; i !== 300000; i += 1) {
             theArray.push(i)
         }
         return testStreamifiedArray(0, theArray, null, theArray)
