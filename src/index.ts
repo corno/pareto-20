@@ -46,7 +46,6 @@ export * from "./stream/createStream"
 export * from "./stream/buildStream"
 export * from "./array/IArray"
 export * from "./array/createArray"
-export * from "./array/streamifyArrayToConsumer"
 export * from "./stream/streamifyDictionary"
 
 export { wrap } from "./wrap"

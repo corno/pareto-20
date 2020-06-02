@@ -24,7 +24,14 @@ class Value<T> implements IValue<T> {
             throw new Error("already called")
         }
         this.isCalled = true
-        this.callerFunction(onResult)
+        try {
+            this.callerFunction(onResult)
+
+        }
+        catch (e) {
+            console.error("unexpected exception", e)
+            throw e
+        }
     }
     /**
      * change the result state
@@ -69,11 +76,17 @@ class Value<T> implements IValue<T> {
     }
     public convertToNativePromise(): Promise<T> {
         return new Promise<T>(resolve => {
-            this.handle(
-                resultData => {
-                    resolve(resultData)
-                }
-            )
+            try {
+                this.handle(
+                    resultData => {
+                        resolve(resultData)
+                    }
+                )
+            }
+            catch (e) {
+                console.error("unexpected exception", e)
+                throw e
+            }
         })
     }
 }
@@ -88,13 +101,19 @@ export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
         new Promise(resolve => {
             resolve()
         }).then(() => {
-            onResult(res)
+            try {
+                onResult(res)
+            }
+            catch (e) {
+                console.error("unexpected exception", e)
+                throw e
+            }
         }).catch(() => {
             //
         })
     })
 }
 
-export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>) : IValue<Type> {
+export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>): IValue<Type> {
     return new Value(callerFunction)
 }

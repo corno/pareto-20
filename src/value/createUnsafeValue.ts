@@ -28,7 +28,14 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
             throw new Error("already called")
         }
         this.isCalled = true
-        this.callerFunction(onError, onSuccess)
+        try {
+            this.callerFunction(onError, onSuccess)
+
+        }
+        catch (e) {
+            console.error("unexpected exception", e)
+            throw e
+        }
     }
     /**
      * change the success state
@@ -211,16 +218,22 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
             )
         })
     }
-    public convertToNativePromise(): Promise<ResultType> {
+    public convertToNativePromise(createErrorMessage: (error: ErrorType) => string): Promise<ResultType> {
         return new Promise((resolve, reject) => {
-            this.handle(
-                errorData => {
-                    reject(errorData)
-                },
-                resultData => {
-                    resolve(resultData)
-                }
-            )
+            try {
+                this.handle(
+                    errorData => {
+                        reject(createErrorMessage(errorData))
+                    },
+                    resultData => {
+                        resolve(resultData)
+                    }
+                )
+            }
+            catch (e) {
+                console.error("unexpected exception", e)
+                throw e
+            }
         })
     }
 }
@@ -254,7 +267,13 @@ export const success = <ResultType, ErrorType>(res: ResultType): IUnsafeValue<Re
         new Promise(resolve => {
             resolve()
         }).then(() => {
-            onSucces(res)
+            try {
+                onSucces(res)
+            }
+            catch (e) {
+                console.error("unexpected exception", e)
+                throw e
+            }
         }).catch(() => {
             //
         })
@@ -271,7 +290,13 @@ export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafeValue<Resul
         new Promise(resolve => {
             resolve()
         }).then(() => {
-            onError(err)
+            try {
+                onError(err)
+            }
+            catch (e) {
+                console.error("unexpected exception", e)
+                throw e
+            }
         }).catch(() => {
             //
         })

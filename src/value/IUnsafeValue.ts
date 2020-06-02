@@ -99,5 +99,5 @@ export interface IUnsafeValue<ResultType, ErrorType> extends api.IUnsafeValue<Re
      * only do this to interface with code that requires native Promises
      * @param promise
      */
-    convertToNativePromise(): Promise<ResultType>
+    convertToNativePromise(createErrorMessage: (error: ErrorType) => string): Promise<ResultType>
 }

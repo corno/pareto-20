@@ -51,7 +51,14 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
                         new Promise(resolve => {
                             resolve()
                         }).then(() => {
-                            onResult(false)
+                            try {
+                                onResult(false)
+
+                            }
+                            catch (e) {
+                                console.error("unexpected exception", e)
+                                throw e
+                            }
                         }).catch(() => {
                             throw new Error("unexpected")
                         })
