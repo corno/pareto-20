@@ -13,14 +13,16 @@ export class BuildableStream<DataType> implements IStreamBuilder<DataType> {
     ) {
         const array: DataType[] = []
 
-        this.stream = createStream((limiter, onData, onEnd) => {
+        this.stream = createStream((limiter, consumer) => {
             return createArray(array).streamify().handle(
                 limiter,
-                data => {
-                    return onData(data)
-                },
-                (aborted, data) => {
-                    return onEnd(aborted, data)
+                {
+                    onData: data => {
+                        return consumer.onData(data)
+                    },
+                    onEnd: (aborted, data) => {
+                        return consumer.onEnd(aborted, data)
+                    },
                 }
             )
         })

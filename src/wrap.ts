@@ -36,22 +36,24 @@ export const wrap = {
         switch (onKeyConflict[0]) {
             case "abort": {
                 const keys: { [key: string]: null } = {}
-                return createKeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
+                return createKeyValueStream<DataType, EndDataType>((limiter, consumer) => {
                     return stream.handle(
                         limiter,
-                        data => {
-                            if (keys[data.key] !== undefined) {
-                                throw new Error(`keyconflict: ${data.key}`)
-                            }
-                            return onData(data)
-                        },
-                        onEnd
+                        {
+                            onData: data => {
+                                if (keys[data.key] !== undefined) {
+                                    throw new Error(`keyconflict: ${data.key}`)
+                                }
+                                return consumer.onData(data)
+                            },
+                            onEnd: (aborted, endData) => consumer.onEnd(aborted, endData),
+                        }
                     )
                 })
             }
             case "ignore": {
-                return createKeyValueStream<DataType, EndDataType>((limiter, onData, onEnd) => {
-                    return stream.handle(limiter, onData, onEnd)
+                return createKeyValueStream<DataType, EndDataType>((limiter, consumer) => {
+                    return stream.handle(limiter, consumer)
                 })
             }
             default:
@@ -106,8 +108,8 @@ export const wrap = {
     //     })
     // },
     Stream: <DataType, EndDataType>(stream: api.IStream<DataType, EndDataType>): IStream<DataType, EndDataType> => {
-        return createStream<DataType, EndDataType>((limiter, onData, onEnd) => {
-            return stream.handle(limiter, onData, onEnd)
+        return createStream<DataType, EndDataType>((limiter, consumer) => {
+            return stream.handle(limiter, consumer)
         })
     },
 }

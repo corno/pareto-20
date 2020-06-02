@@ -63,14 +63,17 @@ class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType,
     //     })
     // }
     public mapRaw<NewDataType>(onData: (data: DataType, key: string) => NewDataType): IKeyValueStream<NewDataType, EndDataType> {
-        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
+        return new KeyValueStream<NewDataType, EndDataType>((newLimiter, newConsumer) => {
             this.handle(
                 newLimiter,
-                data => {
-                    const dataResult = newOnData({ key: data.key, value: onData(data.value, data.key) })
-                    return dataResult
-                },
-                (aborted, data) => newOnEnd(aborted, data)
+                {
+                    onData:
+                        data => {
+                            const dataResult = newConsumer.onData({ key: data.key, value: onData(data.value, data.key) })
+                            return dataResult
+                        },
+                    onEnd: (aborted, data) => newConsumer.onEnd(aborted, data),
+                }
             )
         })
     }

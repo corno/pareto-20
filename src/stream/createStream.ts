@@ -51,30 +51,32 @@ class Stream<DataType, EndDataType>
 
             this.handle(
                 limiter,
-                data => {
-                    return onData(data)
-                },
-                (aborted, endData) => {
-                    return onEnd(aborted, endData).handle(
-                        theError => {
-                            onError(theError)
-                        },
-                        theResult => {
-                            onResult(theResult)
-                        }
-                    )
+                {
+                    onData: data => {
+                        return onData(data)
+                    },
+                    onEnd: (aborted, endData) => {
+                        return onEnd(aborted, endData).handle(
+                            theError => {
+                                onError(theError)
+                            },
+                            theResult => {
+                                onResult(theResult)
+                            }
+                        )
+                    },
                 }
             )
         })
     }
     public map<NewDataType>(convert: (data: DataType) => api.IValue<NewDataType>): IStream<NewDataType, EndDataType> {
-        return new Stream<NewDataType, EndDataType>((newLimiter, newOnData, newOnEnd) => {
+        return new Stream<NewDataType, EndDataType>((newLimiter, newConsumer) => {
             let endDataX: EndDataType
             return this.toUnsafeValue(
                 newLimiter,
                 data => {
                     return wrap.Value(convert(data)).mapResult(firstResult => {
-                        return newOnData(firstResult)
+                        return newConsumer.onData(firstResult)
                     })
                 },
                 (_aborted, endData) => {
@@ -83,11 +85,11 @@ class Stream<DataType, EndDataType>
                 }
             ).rework(
                 () => {
-                    newOnEnd(true, endDataX)
+                    newConsumer.onEnd(true, endDataX)
                     return error(null)
                 },
                 () => {
-                    newOnEnd(false, endDataX)
+                    newConsumer.onEnd(false, endDataX)
                     return success(null)
                 },
             )
@@ -95,16 +97,18 @@ class Stream<DataType, EndDataType>
     }
 
     public mapEndData<NewEndDataType>(convert: (data: EndDataType) => api.IValue<NewEndDataType>): IStream<DataType, NewEndDataType> {
-        return new Stream<DataType, NewEndDataType>((newLimiter, newOnData, newOnEnd) => {
+        return new Stream<DataType, NewEndDataType>((newLimiter, newConsumer) => {
             return this.handle(
                 newLimiter,
-                newOnData,
-                (aborted, data) => {
-                    return wrap.Value(convert(data)).handle(
-                        newEndData => {
-                            newOnEnd(aborted, newEndData)
-                        }
-                    )
+                {
+                    onData: data => newConsumer.onData(data),
+                    onEnd: (aborted, data) => {
+                        return wrap.Value(convert(data)).handle(
+                            newEndData => {
+                                newConsumer.onEnd(aborted, newEndData)
+                            }
+                        )
+                    },
                 }
             )
         })

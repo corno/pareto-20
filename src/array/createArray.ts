@@ -17,7 +17,7 @@ type State = {
 function loopUntilEndOrPromise<ElementType>(
     array: ElementType[],
     state: State,
-    onData: (data: ElementType) => api.IValue<boolean>,
+    consumer: api.StreamConsumer<ElementType, null>,
 ): api.IValue<boolean> {
     while (true) {
         if (state.mustAbort) {
@@ -26,7 +26,7 @@ function loopUntilEndOrPromise<ElementType>(
         if (state.index === array.length) {
             return result(false) //end reached
         }
-        const onDataResult = onData(array[state.index])
+        const onDataResult = consumer.onData(array[state.index])
         state.index += 1
 
         return wrap.Value(onDataResult).mapResult(mustAbort => {
@@ -37,7 +37,7 @@ function loopUntilEndOrPromise<ElementType>(
             return loopUntilEndOrPromise(
                 array,
                 state,
-                onData,
+                consumer,
             )
         })
     }
@@ -45,8 +45,7 @@ function loopUntilEndOrPromise<ElementType>(
 
 function pushData<ElementType>(
     theArray: ElementType[],
-    onData: (data: ElementType) => api.IValue<boolean>,
-    onEnd: (aborted: boolean, endData: null) => void,
+    consumer: api.StreamConsumer<ElementType, null>,
     isLimited: boolean
 ): void {
     const state: State = {
@@ -56,13 +55,13 @@ function pushData<ElementType>(
     wrap.Value(loopUntilEndOrPromise(
         theArray,
         state,
-        onData
+        consumer
     )).handle(
         aborted => {
             if (aborted || isLimited) {
-                return onEnd(true, null)
+                return consumer.onEnd(true, null)
             } else {
-                return onEnd(false, null)
+                return consumer.onEnd(false, null)
             }
         }
     )
@@ -79,17 +78,16 @@ class MyArray<ElementType> implements IArray<ElementType> {
     ): IStream<ElementType, null> {
         return createStream((
             limiter: null | api.StreamLimiter,
-            onData: (data: ElementType) => api.IValue<boolean>,
-            onEnd: (aborted: boolean, endData: null) => void
+            consumer: api.StreamConsumer<ElementType, null>,
         ): void => {
             if (limiter !== null && limiter.maximum < this.imp.length) {
                 if (limiter.abortEarly) {
-                    onEnd(true, null)
+                    consumer.onEnd(true, null)
                 } else {
-                    pushData(this.imp.slice(0, limiter.maximum), onData, onEnd, true)
+                    pushData(this.imp.slice(0, limiter.maximum), consumer, true)
                 }
             } else {
-                pushData(this.imp, onData, onEnd, false)
+                pushData(this.imp, consumer, false)
             }
         })
     }

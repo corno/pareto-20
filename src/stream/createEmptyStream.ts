@@ -8,16 +8,17 @@ import { IStream } from "./IStream"
 export function createEmptyStream<DataType>(): IStream<DataType, null> {
     return createStream((
         limiter,
-        onData,
-        onEnd,
+        consumer,
     ) => {
         return createArray([]).streamify().handle(
             limiter,
-            data => {
-                return onData(data)
-            },
-            (aborted, endData) => {
-                return onEnd(aborted, endData)
+            {
+                onData: data => {
+                    return consumer.onData(data)
+                },
+                onEnd: (aborted, endData) => {
+                    return consumer.onEnd(aborted, endData)
+                },
             }
         )
     })
