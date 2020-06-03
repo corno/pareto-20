@@ -14,8 +14,10 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
 
     toUnsafeValue<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
-        onData: (data: DataType) => api.IValue<boolean>, //
-        onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
+        consumer: {
+            onData: (data: DataType) => api.IValue<boolean>
+            onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
+        }
     ): IUnsafeValue<ResultType, ErrorType>
     map<NewDataType>(
         onData: (data: DataType) => api.IValue<NewDataType>

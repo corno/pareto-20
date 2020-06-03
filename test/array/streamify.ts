@@ -39,48 +39,50 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
         theArray,
     ).streamify().toUnsafeValue(
         null,
-        data => {
-            //console.log(data)
-            out.push(data)
-            if (data === abortOn) {
-                return result(true)
-            }
-            if (timeout !== null) {
-                return wrapSafeFunction<boolean>(onResult => {
-                    if (timeout === 0) {
-                        new Promise(resolve => {
-                            resolve()
-                        }).then(() => {
-                            try {
-                                onResult(false)
+        {
+            onData: data => {
+                //console.log(data)
+                out.push(data)
+                if (data === abortOn) {
+                    return result(true)
+                }
+                if (timeout !== null) {
+                    return wrapSafeFunction<boolean>(onResult => {
+                        if (timeout === 0) {
+                            new Promise(resolve => {
+                                resolve()
+                            }).then(() => {
+                                try {
+                                    onResult(false)
 
-                            }
-                            catch (e) {
-                                console.error("unexpected exception", e)
-                                throw e
-                            }
-                        }).catch(() => {
-                            throw new Error("unexpected")
-                        })
-                    } else {
-                        setTimeout(
-                            () => {
-                                onResult(false)
-                            },
-                            Math.random() * 10
-                        )
-                    }
-                })
-            } else {
-                return result(false)
-            }
-        },
-        aborted => {
-            //
-            if (aborted) {
-                out.push(null)
-            }
-            return result(null)
+                                }
+                                catch (e) {
+                                    console.error("unexpected exception", e)
+                                    throw e
+                                }
+                            }).catch(() => {
+                                throw new Error("unexpected")
+                            })
+                        } else {
+                            setTimeout(
+                                () => {
+                                    onResult(false)
+                                },
+                                Math.random() * 10
+                            )
+                        }
+                    })
+                } else {
+                    return result(false)
+                }
+            },
+            onEnd: aborted => {
+                //
+                if (aborted) {
+                    out.push(null)
+                }
+                return result(null)
+            },
         }
     )).reworkAndCatch(
         () => {

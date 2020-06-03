@@ -44,8 +44,10 @@ class Stream<DataType, EndDataType>
 
     toUnsafeValue<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
-        onData: (data: DataType) => api.IValue<boolean>, //
-        onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
+        consumer: {
+            onData: (data: DataType) => api.IValue<boolean>
+            onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
+        },
     ): IUnsafeValue<ResultType, ErrorType> {
         return createUnsafeValue((onError, onResult) => {
 
@@ -53,10 +55,10 @@ class Stream<DataType, EndDataType>
                 limiter,
                 {
                     onData: data => {
-                        return onData(data)
+                        return consumer.onData(data)
                     },
                     onEnd: (aborted, endData) => {
-                        return onEnd(aborted, endData).handle(
+                        return consumer.onEnd(aborted, endData).handle(
                             theError => {
                                 onError(theError)
                             },
@@ -74,14 +76,16 @@ class Stream<DataType, EndDataType>
             let endDataX: EndDataType
             return this.toUnsafeValue(
                 newLimiter,
-                data => {
-                    return wrap.Value(convert(data)).mapResult(firstResult => {
-                        return newConsumer.onData(firstResult)
-                    })
-                },
-                (_aborted, endData) => {
-                    endDataX = endData
-                    return result(null)
+                {
+                    onData: data => {
+                        return wrap.Value(convert(data)).mapResult(firstResult => {
+                            return newConsumer.onData(firstResult)
+                        })
+                    },
+                    onEnd: (_aborted, endData) => {
+                        endDataX = endData
+                        return result(null)
+                    },
                 }
             ).rework(
                 () => {
