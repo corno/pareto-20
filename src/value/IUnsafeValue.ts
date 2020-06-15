@@ -82,7 +82,9 @@ export interface IUnsafeValue<ResultType, ErrorType> extends api.IUnsafeValue<Re
      * as this unsafe promise
      * @param onError if the promise results in an error, this handler is called.
      */
-    catch(onError: (error: ErrorType) => ResultType, ): IValue<ResultType>
+    catch(
+        onError: (error: ErrorType) => api.IValue<ResultType>
+    ): IValue<ResultType>
     /**
      * convert this unsafe promise into a safe promise by handling both the
      * success state and the error state

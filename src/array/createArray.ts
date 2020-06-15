@@ -58,14 +58,9 @@ function pushData<ElementType>(
         consumer
     )).handle(
         aborted => {
-            if (aborted || isLimited) {
-                return consumer.onEnd(true, null)
-            } else {
-                return consumer.onEnd(false, null)
-            }
+            consumer.onEnd((aborted || isLimited), null)
         }
     )
-
 }
 
 

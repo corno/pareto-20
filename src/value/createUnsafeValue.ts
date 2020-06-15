@@ -184,11 +184,11 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * as this unsafe promise
      * @param onError if the promise results in an error, this handler is called.
      */
-    public catch(onError: (error: ErrorType) => ResultType): IValue<ResultType> {
+    public catch(onError: (error: ErrorType) => IValue<ResultType>): IValue<ResultType> {
         return createSafeValue<ResultType>(onResult => {
             this.handle(
                 err => {
-                    onResult(onError(err))
+                    onError(err).handle(res => onResult(res))
                 },
                 res => {
                     onResult(res)
