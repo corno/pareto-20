@@ -15,7 +15,7 @@ class Value<T> implements IValue<T> {
      * outskirts of the program
      * @param onResult
      */
-    public handle(onResult: (result: T) => void): void {
+    public handle(onResult: (result2: T) => void): void {
         if (this.isCalled) {
             // console.log("callerFunction")
             // console.log(this.callerFunction.toString())
@@ -39,7 +39,7 @@ class Value<T> implements IValue<T> {
      * if you do not want to return a promise, use 'mapResultRaw'
      * @param onResult
      */
-    public mapResult<NewType>(onResult: (result: T) => api.IValue<NewType>): Value<NewType> {
+    public mapResult<NewType>(onResult: (result2: T) => api.IValue<NewType>): Value<NewType> {
         return new Value<NewType>(newOnResult => {
             this.handle(res => {
                 onResult(res).handle(newOnResult)
@@ -53,7 +53,7 @@ class Value<T> implements IValue<T> {
      * if you want to return a promise, use 'mapResult'
      * @param onResult
      */
-    public mapResultRaw<NewType>(onResult: (result: T) => NewType): Value<NewType> {
+    public mapResultRaw<NewType>(onResult: (result2: T) => NewType): Value<NewType> {
         return new Value<NewType>(newOnResult => {
             this.handle(res => {
                 newOnResult(onResult(res))
@@ -66,7 +66,7 @@ class Value<T> implements IValue<T> {
      * if this fails the new unsafe promise will be in an error state
      * @param callback
      */
-    public try<ResultType, ErrorType>(callback: (result: T) => api.IUnsafeValue<ResultType, ErrorType>): IUnsafeValue<ResultType, ErrorType> {
+    public try<ResultType, ErrorType>(callback: (result2: T) => api.IUnsafeValue<ResultType, ErrorType>): IUnsafeValue<ResultType, ErrorType> {
         return createUnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
             this.handle(res => {
                 callback(res).handle(onError, onSuccess)

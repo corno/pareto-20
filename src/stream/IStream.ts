@@ -45,9 +45,9 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
     //         errors: IStream<IntermediateErrorType, EndDataType>
     //     }
     // >
-    mergeUnsafeValues<DataType, ReturnType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+    mergeUnsafeValues<DataType2, ReturnType, TargetType, IntermediateErrorType, ErrorType>(
         _limiter: null | api.StreamLimiter,
-        _onData: (entry: DataType) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
+        _onData: (entry: DataType2) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
         _createError: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => ErrorType,
     ): IUnsafeValue<IStream<TargetType, EndDataType>, ErrorType>
 }

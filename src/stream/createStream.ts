@@ -224,11 +224,11 @@ class Stream<DataType, EndDataType>
     //         )
     //     })
     // }
-    public mergeUnsafeValues<DataType, ReturnType, EndDataType, TargetType, IntermediateErrorType, ErrorType>(
+    public mergeUnsafeValues<DataType2, ReturnType, EndDataType2, TargetType, IntermediateErrorType, ErrorType>(
         _limiter: null | api.StreamLimiter,
-        _onData: (entry: DataType) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
-        _createError: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType>) => ErrorType,
-    ): IUnsafeValue<IStream<TargetType, EndDataType>, ErrorType> {
+        _onData: (entry: DataType2) => [api.IUnsafeValue<TargetType, IntermediateErrorType>, ReturnType],
+        _createError: (aborted: boolean, errors: IStream<IntermediateErrorType, EndDataType2>) => ErrorType,
+    ): IUnsafeValue<IStream<TargetType, EndDataType2>, ErrorType> {
         throw new Error("IMPLEMENT ME")
         // return new UnsafePromise<IStream<TargetType, EndDataType>, ErrorType>((onError, onSuccess) => {
         //     let hasErrors = false

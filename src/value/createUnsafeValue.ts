@@ -17,7 +17,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onError
      * @param onSuccess
      */
-    public handle(onError: (error: ErrorType) => void, onSuccess: (result: ResultType) => void): void {
+    public handle(onError: (error2: ErrorType) => void, onSuccess: (result2: ResultType) => void): void {
         if (this.isCalled) {
             // console.log("callerFunction")
             // console.log(this.callerFunction)
@@ -45,7 +45,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onSuccess
      */
     public mapResult<NewResultType>(
-        onSuccess: (result: ResultType) => api.IValue<NewResultType>
+        onSuccess: (result2: ResultType) => api.IValue<NewResultType>
     ): UnsafeValue<NewResultType, ErrorType> {
         return new UnsafeValue((newOnError, newOnSuccess) => {
             this.handle(
@@ -67,7 +67,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onSuccess
      */
     public mapResultRaw<NewResultType>(
-        onSuccess: (result: ResultType) => NewResultType
+        onSuccess: (result2: ResultType) => NewResultType
     ): UnsafeValue<NewResultType, ErrorType> {
         return this.mapResult(data => result(onSuccess(data)))
     }
@@ -79,7 +79,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onError
      */
     public mapError<NewErrorType>(
-        onError: (error: ErrorType) => api.IValue<NewErrorType>,
+        onError: (error2: ErrorType) => api.IValue<NewErrorType>,
     ): UnsafeValue<ResultType, NewErrorType> {
         return new UnsafeValue((newOnError, newOnSuccess) => {
             this.handle(
@@ -98,7 +98,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * if you want to return a promise, use 'mapError'
      * @param onError
      */
-    public mapErrorRaw<NewErrorType>(onError: (error: ErrorType) => NewErrorType): UnsafeValue<ResultType, NewErrorType> {
+    public mapErrorRaw<NewErrorType>(onError: (error2: ErrorType) => NewErrorType): UnsafeValue<ResultType, NewErrorType> {
         return this.mapError(err => result(onError(err)))
     }
     /**
@@ -108,7 +108,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onSuccess
      */
     public try<NewResultType>(
-        onSuccess: (result: ResultType) => api.IUnsafeValue<NewResultType, ErrorType>
+        onSuccess: (result2: ResultType) => api.IUnsafeValue<NewResultType, ErrorType>
     ): UnsafeValue<NewResultType, ErrorType> {
         return new UnsafeValue((newOnError, newOnSuccess) => {
             this.handle(
@@ -128,7 +128,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onError
      */
     public tryToCatch<NewErrorType>(
-        onError: (error: ErrorType) => api.IUnsafeValue<ResultType, NewErrorType>,
+        onError: (error2: ErrorType) => api.IUnsafeValue<ResultType, NewErrorType>,
     ): UnsafeValue<ResultType, NewErrorType> {
         return new UnsafeValue((newOnError, newOnSuccess) => {
             this.handle(
@@ -165,8 +165,8 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onSuccess
      */
     public rework<NewResultType, NewErrorType>(
-        onError: (error: ErrorType) => api.IUnsafeValue<NewResultType, NewErrorType>,
-        onSuccess: (result: ResultType) => api.IUnsafeValue<NewResultType, NewErrorType>
+        onError: (error2: ErrorType) => api.IUnsafeValue<NewResultType, NewErrorType>,
+        onSuccess: (result2: ResultType) => api.IUnsafeValue<NewResultType, NewErrorType>
     ): UnsafeValue<NewResultType, NewErrorType> {
         return new UnsafeValue((newOnError, newOnSuccess) => {
             this.handle(
@@ -184,7 +184,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * as this unsafe promise
      * @param onError if the promise results in an error, this handler is called.
      */
-    public catch(onError: (error: ErrorType) => IValue<ResultType>): IValue<ResultType> {
+    public catch(onError: (error2: ErrorType) => IValue<ResultType>): IValue<ResultType> {
         return createSafeValue<ResultType>(onResult => {
             this.handle(
                 err => {
@@ -204,8 +204,8 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onSuccess
      */
     public reworkAndCatch<NewResultType>(
-        onError: (error: ErrorType) => api.IValue<NewResultType>,
-        onSuccess: (result: ResultType) => api.IValue<NewResultType>
+        onError: (error2: ErrorType) => api.IValue<NewResultType>,
+        onSuccess: (result2: ResultType) => api.IValue<NewResultType>
     ): IValue<NewResultType> {
         return createSafeValue<NewResultType>(onResult => {
             this.handle(
@@ -218,7 +218,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
             )
         })
     }
-    public convertToNativePromise(createErrorMessage: (error: ErrorType) => string): Promise<ResultType> {
+    public convertToNativePromise(createErrorMessage: (error2: ErrorType) => string): Promise<ResultType> {
         return new Promise((resolve, reject) => {
             try {
                 this.handle(
@@ -239,8 +239,8 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
 }
 
 export type UnsafeCallerFunction<ResultType, ErrorType> = (
-    onError: (error: ErrorType) => void,
-    onResult: (result: ResultType) => void
+    onError: (error2: ErrorType) => void,
+    onResult: (result2: ResultType) => void
 ) => void
 
 export type DefaultError = {
@@ -250,8 +250,8 @@ export type DefaultError = {
 
 export function wrapUnsafeFunction<ResultType, ErrorType>(
     func: (
-        onError: (error: ErrorType) => void,
-        onResult: (result: ResultType) => void
+        onError: (error2: ErrorType) => void,
+        onResult: (result2: ResultType) => void
     ) => void
 ): IUnsafeValue<ResultType, ErrorType> {
     return new UnsafeValue(func)

@@ -90,7 +90,7 @@ class MyArray<ElementType> implements IArray<ElementType> {
         callback: (element: ElementType) => IValue<ResultType>,
     ): IValue<ResultType[]> {
         let isExecuted = false
-        const execute = (onResult: (results: ResultType[]) => void) => {
+        const execute = (onResult: (results2: ResultType[]) => void) => {
             if (isExecuted === true) {
                 throw new Error("all promise is already executed")
             }
@@ -129,7 +129,7 @@ class MyArray<ElementType> implements IArray<ElementType> {
         callback: (element: ElementType) => IUnsafeValue<ResultType, ErrorType>,
     ): IUnsafeValue<ResultType[], ErrorType[]> {
         let isExecuted = false
-        const execute = (onErrors: (errors: ErrorType[]) => void, onSuccess: (results: ResultType[]) => void) => {
+        const execute = (onErrors: (errors2: ErrorType[]) => void, onSuccess: (results2: ResultType[]) => void) => {
             if (isExecuted === true) {
                 throw new Error("all promise is already executed")
             }
