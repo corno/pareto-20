@@ -2,7 +2,7 @@ import * as api from "pareto-api"
 
 export function streamifyDictionary<ElementType>(
     _dictionary: { [key: string]: ElementType },
-): api.ProcessKeyValueStreamFunction<ElementType, null> {
+): api.HandleKeyValueStreamFunction<ElementType, null> {
     //const keys = Object.keys(dictionary)
     throw new Error("IMPLEMENT ME")
     // return (

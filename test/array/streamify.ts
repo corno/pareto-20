@@ -50,7 +50,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
                     return wrapSafeFunction<boolean>(onResult => {
                         if (timeout === 0) {
                             new Promise(resolve => {
-                                resolve()
+                                resolve(0)
                             }).then(() => {
                                 try {
                                     onResult(false)

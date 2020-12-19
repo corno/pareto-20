@@ -8,7 +8,7 @@ class SafeResource<ResourceType> implements ISafeResource<ResourceType> {
     constructor(openFunction: SafeFunction<ResourceType>) {
         this.openFunction = openFunction
     }
-    public openSafeOpenableResource(onOpened: (openedResource: ISafeOpenedResource<ResourceType>) => void): void {
+    public open(onOpened: (openedResource: ISafeOpenedResource<ResourceType>) => void): void {
         this.openFunction(
             (resource: ResourceType, closer: () => void) => {
                 onOpened(createSafeOpenedResource<ResourceType>(resource, closer))

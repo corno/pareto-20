@@ -10,7 +10,7 @@ class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenReso
     constructor(openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>) {
         this.openFunction = openFunction
     }
-    public openUnsafeOpenableResource(
+    public open(
         onError: (openError: OpenError) => void,
         onOpened: (openedResource: ISafeOpenedResource<ResourceType>) => void
     ): void {
@@ -27,13 +27,13 @@ class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenReso
         onOpenSuccess: (openReource: ResourceType) => api.IValue<ResultType>
     ): IValue<ResultType> {
         const newFunc: SafeCallerFunction<ResultType> = onResult => {
-            this.openUnsafeOpenableResource(
+            this.open(
                 err => {
                     onOpenError(err).handle(onResult)
                 },
                 res => {
-                    onOpenSuccess(res.resource).handle(onResult)
-                    res.closeSafeOpenedResource()
+                    onOpenSuccess(res.content).handle(onResult)
+                    res.close()
                 }
             )
         }

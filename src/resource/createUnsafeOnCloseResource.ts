@@ -10,7 +10,7 @@ class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseR
     constructor(openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>) {
         this.openFunction = openFunction
     }
-    public openSafeOpenableResource(
+    public open(
         onOpened: (openedResource: IUnsafeOpenedResource<ResourceType, CloseError>) => void
     ): void {
         this.openFunction(
@@ -37,11 +37,11 @@ class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseR
     }
     public suppressCloseError(closeErrorHandler: (error: CloseError) => void): ISafeResource<ResourceType> {
         return createSafeResource<ResourceType>(onOpened => {
-            this.openSafeOpenableResource(
+            this.open(
                 success => onOpened(
-                    success.resource,
+                    success.content,
                     () => {
-                        success.closeUnsafeOpenedResource(closeErrorHandler)
+                        success.close(closeErrorHandler)
                     }
                 )
             )

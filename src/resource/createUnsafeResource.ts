@@ -9,7 +9,7 @@ class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeReso
     constructor(openFunction: UnsafeFunction<ResourceType, OpenError, CloseError>) {
         this.openFunction = openFunction
     }
-    public openUnsafeOpenableResource(
+    public open(
         onError: (openError: OpenError) => void,
         onOpened: (openedResource: IUnsafeOpenedResource<ResourceType, CloseError>) => void
     ): void {
@@ -23,12 +23,12 @@ class UnsafeResource<ResourceType, OpenError, CloseError> implements IUnsafeReso
 
     public suppressCloseError(closeErrorHandler: (error: CloseError) => void): IUnsafeOnOpenResource<ResourceType, OpenError> {
         return createUnsafeOnOpenResource((onOpenError, onSuccess) => {
-            this.openUnsafeOpenableResource(
+            this.open(
                 onOpenError,
                 success => onSuccess(
-                    success.resource,
+                    success.content,
                     () => {
-                        success.closeUnsafeOpenedResource(closeErrorHandler)
+                        success.close(closeErrorHandler)
                     }
                 )
             )

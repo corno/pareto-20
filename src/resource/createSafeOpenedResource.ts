@@ -1,13 +1,13 @@
 import { ISafeOpenedResource } from "./ISafeOpenedResource"
 
 class SafeOpenedResource<ResourceType> implements ISafeOpenedResource<ResourceType> {
-    public readonly resource: ResourceType
+    public readonly content: ResourceType
     private readonly closer: () => void
     constructor(resource: ResourceType, closer: () => void) {
-        this.resource = resource
+        this.content = resource
         this.closer = closer
     }
-    public closeSafeOpenedResource(): void {
+    public close(): void {
         this.closer()
     }
 }

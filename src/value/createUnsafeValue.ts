@@ -264,7 +264,7 @@ export const success = <ResultType, ErrorType>(res: ResultType): IUnsafeValue<Re
     //of non-promises are handled recursively, this will lead to a stack overflow.
     //
     return new UnsafeValue((_onError, onSucces) => {
-        new Promise(resolve => {
+        new Promise<void>(resolve => {
             resolve()
         }).then(() => {
             try {
@@ -287,7 +287,7 @@ export const error = <ResultType, ErrorType>(err: ErrorType): IUnsafeValue<Resul
         //the promises cannot be handled with a forEach loop. They have to be called recursively. But if a large array
         //of non-promises are handled recursively, this will lead to a stack overflow.
         //
-        new Promise(resolve => {
+        new Promise<void>(resolve => {
             resolve()
         }).then(() => {
             try {

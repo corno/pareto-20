@@ -10,9 +10,9 @@ import { IKeyValueStream } from "./IKeyValueStream"
 // import { FilterResult } from "./IStream"
 
 class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType, EndDataType> {
-    public readonly handle: api.ProcessKeyValueStreamFunction<DataType, EndDataType>
+    public readonly handle: api.HandleKeyValueStreamFunction<DataType, EndDataType>
     constructor(
-        processStreamFunction: api.ProcessKeyValueStreamFunction<DataType, EndDataType>,
+        processStreamFunction: api.HandleKeyValueStreamFunction<DataType, EndDataType>,
     ) {
         this.handle = processStreamFunction
     }
@@ -160,7 +160,7 @@ class KeyValueStream<DataType, EndDataType> implements IKeyValueStream<DataType,
 }
 
 export function createKeyValueStream<DataType, EndDataType>(
-    processStreamFunction: api.ProcessKeyValueStreamFunction<DataType, EndDataType>,
+    processStreamFunction: api.HandleKeyValueStreamFunction<DataType, EndDataType>,
 
 ): IKeyValueStream<DataType, EndDataType> {
     return new KeyValueStream(
