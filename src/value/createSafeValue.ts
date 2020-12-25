@@ -91,11 +91,15 @@ class Value<T> implements IValue<T> {
     }
 }
 
+export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>): IValue<Type> {
+    return new Value(callerFunction)
+}
+
 export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): IValue<ResultType> {
     return createSafeValue(func)
 }
 
-//If a Safe Value is required, but the result is already known
+//use this if a (safe) Value is required, but the result is already known
 export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
     return createSafeValue(onResult => {
         new Promise<void>(resolve => {
@@ -112,8 +116,4 @@ export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
             //
         })
     })
-}
-
-export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>): IValue<Type> {
-    return new Value(callerFunction)
 }

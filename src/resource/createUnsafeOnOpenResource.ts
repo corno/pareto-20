@@ -67,7 +67,7 @@ export type UnsafeOnOpenFunction<ResultType, OpenError> = (
 
 export function wrapUnsafeOnOpenResource<ResourceType, OpenError>(
     openFunction: UnsafeOnOpenFunction<ResourceType, OpenError>
-): UnsafeOnOpenResource<ResourceType, OpenError> {
+): IUnsafeOnOpenResource<ResourceType, OpenError> {
     return new UnsafeOnOpenResource(openFunction)
 }
 

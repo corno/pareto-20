@@ -21,7 +21,7 @@ class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseR
     }
     public mapCloseError<NewErrorType>(
         errorConverter: (closeError: CloseError) => NewErrorType
-    ): UnsafeOnCloseResource<ResourceType, NewErrorType> {
+    ): IUnsafeOnCloseResource<ResourceType, NewErrorType> {
         return new UnsafeOnCloseResource(onOpened => {
             this.openFunction(
                 (resource, closer) => onOpened(resource, errorCallback => closer(oldCloseError => errorCallback(errorConverter(oldCloseError))))
@@ -51,6 +51,6 @@ class UnsafeOnCloseResource<ResourceType, CloseError> implements IUnsafeOnCloseR
 
 export function wrapUnsafeOnCloseResource<ResourceType, CloseError>(
     openFunction: UnsafeOnCloseFunction<ResourceType, CloseError>
-): UnsafeOnCloseResource<ResourceType, CloseError> {
+): IUnsafeOnCloseResource<ResourceType, CloseError> {
     return new UnsafeOnCloseResource(openFunction)
 }

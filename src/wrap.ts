@@ -14,15 +14,6 @@ function assertUnreachable<RT>(_x: never): RT {
     throw new Error("unreachable")
 }
 
-// import { ISafeResource } from "./resources/ISafeResource"
-// import { IUnsafeOnCloseResource } from "./resources/IUnsafeOnCloseResource"
-// import { IUnsafeOnOpenResource } from "./resources/IUnsafeOnOpenResource"
-// import { IUnsafeResource } from "./resources/IUnsafeResource"
-// import { SafeResource } from "./resources/SafeResource"
-// import { UnsafeOnCloseResource } from "./resources/UnsafeOnCloseResource"
-// import { UnsafeOnOpenResource } from "./resources/UnsafeOnOpenResource"
-// import { UnsafeResource } from "./resources/UnsafeResource"
-
 export type OnKeyConflict =
     ["ignore"]
     |

@@ -5,7 +5,7 @@ import { createUnsafeValue } from "./value/createUnsafeValue"
 export function assertNotNull<InputType, ResultType, ErrorType>(
     value: null | InputType,
     onNull: () => ErrorType,
-    onNotNull: (value: InputType
+    onNotNull: (input: InputType
 ) => ResultType): IUnsafeValue<ResultType, ErrorType> {
     return createUnsafeValue<ResultType, ErrorType>((onError, onSuccess) => {
         if (value === null) {
@@ -16,7 +16,7 @@ export function assertNotNull<InputType, ResultType, ErrorType>(
     })
 }
 
-export function onNullableValue<InputType, ResultType>(value: null | InputType, onNull: () => ResultType, onNotNull: (value: InputType) => ResultType): ResultType {
+export function onNullableValue<InputType, ResultType>(value: null | InputType, onNull: () => ResultType, onNotNull: (input: InputType) => ResultType): ResultType {
     if (value === null) {
         return onNull()
     } else {
