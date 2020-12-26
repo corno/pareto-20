@@ -101,6 +101,7 @@ export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType
 
 /**
  * use this if a (safe) Value is required, but the result is already known
+ * @deprecated use 'value()' instead
  */
 export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
     return createSafeValue(onResult => {
