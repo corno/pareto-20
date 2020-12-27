@@ -1,7 +1,7 @@
 
-import { IStream } from "../stream/IStream"
 import * as api from "pareto-api"
-import { result, createSafeValue } from "../value/createSafeValue"
+import { IStream } from "../stream/IStream"
+import { value, createSafeValue } from "../value/createSafeValue"
 import { wrap } from "../wrap"
 import { createStream } from "../stream/createStream"
 import { IArray } from "./IArray"
@@ -17,27 +17,27 @@ type State = {
 function loopUntilEndOrPromise<ElementType>(
     array: ElementType[],
     state: State,
-    consumer: api.StreamConsumer<ElementType, null>,
+    handler: api.IStreamHandler<ElementType, null>,
 ): api.IValue<boolean> {
     while (true) {
         if (state.mustAbort) {
-            return result(true)
+            return value(true)
         }
         if (state.index === array.length) {
-            return result(false) //end reached
+            return value(false) //end reached
         }
-        const onDataResult = consumer.onData(array[state.index])
+        const onDataResult = handler.onData(array[state.index])
         state.index += 1
 
         return wrap.Value(onDataResult).mapResult(mustAbort => {
             if (mustAbort) {
                 state.mustAbort = true
-                return result(true)
+                return value(true)
             }
             return loopUntilEndOrPromise(
                 array,
                 state,
-                consumer,
+                handler,
             )
         })
     }
@@ -45,7 +45,7 @@ function loopUntilEndOrPromise<ElementType>(
 
 function pushData<ElementType>(
     theArray: ElementType[],
-    consumer: api.StreamConsumer<ElementType, null>,
+    consumer: api.IStreamHandler<ElementType, null>,
     isLimited: boolean
 ): void {
     const state: State = {
@@ -73,16 +73,16 @@ class MyArray<ElementType> implements IArray<ElementType> {
     ): IStream<ElementType, null> {
         return createStream((
             limiter: null | api.StreamLimiter,
-            consumer: api.StreamConsumer<ElementType, null>,
+            handler: api.IStreamHandler<ElementType, null>,
         ): void => {
             if (limiter !== null && limiter.maximum < this.imp.length) {
                 if (limiter.abortEarly) {
-                    consumer.onEnd(true, null)
+                    handler.onEnd(true, null)
                 } else {
-                    pushData(this.imp.slice(0, limiter.maximum), consumer, true)
+                    pushData(this.imp.slice(0, limiter.maximum), handler, true)
                 }
             } else {
-                pushData(this.imp, consumer, false)
+                pushData(this.imp, handler, false)
             }
         })
     }

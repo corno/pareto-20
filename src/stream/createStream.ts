@@ -42,7 +42,7 @@ class Stream<DataType, EndDataType>
     //     })
     // }
 
-    toUnsafeValue<ResultType, ErrorType>(
+    consume<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
         consumer: {
             onData: (data: DataType) => api.IValue<boolean>
@@ -74,7 +74,7 @@ class Stream<DataType, EndDataType>
     public map<NewDataType>(convert: (data: DataType) => api.IValue<NewDataType>): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newConsumer) => {
             let endDataX: EndDataType
-            return this.toUnsafeValue(
+            return this.consume(
                 newLimiter,
                 {
                     onData: data => {

@@ -27,7 +27,7 @@
     "dist/*"
   ],
   "dependencies": {
-    "pareto-api": "^10.0.2"
+    "pareto-api": "^11.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.14",

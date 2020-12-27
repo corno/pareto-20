@@ -1,6 +1,6 @@
 import * as chai from "chai"
 import * as sa from "../../src/array/createArray"
-import { wrapSafeFunction, result, wrap } from "../../src"
+import { wrapSafeFunction, result, success, wrap } from "../../src"
 
 
 describe("stringfyArray", () => {
@@ -37,7 +37,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
 
     return wrap.UnsafeValue(sa.createArray(
         theArray,
-    ).streamify().toUnsafeValue(
+    ).streamify().consume(
         null,
         {
             onData: data => {
@@ -81,7 +81,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
                 if (aborted) {
                     out.push(null)
                 }
-                return result(null)
+                return success(null)
             },
         }
     )).reworkAndCatch(

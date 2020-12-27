@@ -1,7 +1,6 @@
 import * as api from "pareto-api"
 import { IUnsafeValue } from "../value/IUnsafeValue"
-//import { ISafePromise } from "../promises/ISafePromise"
-//import { IUnsafePromise } from "../promises/IUnsafePromise"
+import { IStreamConsumer } from "./IStreamConsumer"
 
 export type FilterResult<DataType> = [false] | [true, DataType]
 
@@ -12,12 +11,14 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
     //     onAborted: (() => void) | null,
     // ): api.IUnsafeValue<DataType[], null>
 
-    toUnsafeValue<ResultType, ErrorType>(
+    /**
+     * consuming a stream transforms the stream into an IUnsafeValue.
+     * @param limiter
+     * @param consumer
+     */
+    consume<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
-        consumer: {
-            onData: (data: DataType) => api.IValue<boolean>
-            onEnd: (aborted: boolean, endData: EndDataType) => api.IUnsafeValue<ResultType, ErrorType>
-        }
+        consumer: IStreamConsumer<DataType, EndDataType, ResultType, ErrorType>
     ): IUnsafeValue<ResultType, ErrorType>
     map<NewDataType>(
         onData: (data: DataType) => api.IValue<NewDataType>
