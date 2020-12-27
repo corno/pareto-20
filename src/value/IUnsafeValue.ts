@@ -1,6 +1,11 @@
 import * as api from "pareto-api"
 import { IValue } from "./ISafeValue"
 
+
+/**
+ * IUnsafeValue is a wrapper around a value but if there is an error and the value is not present it is a wrapper around an error value
+ * the IUnsafeValue has multiple methods to transform it to something else
+ */
 export interface IUnsafeValue<ResultType, ErrorType> extends api.IUnsafeValue<ResultType, ErrorType> {
     /**
      * change the success state

@@ -3,6 +3,9 @@ import { IUnsafeValue } from "./IUnsafeValue"
 
 export type SafeCallerFunction<ResultType> = (onResult: (result: ResultType) => void) => void
 
+/**
+ * IValue is a wrapper around an actual value and provides several methods to transform the value into something else
+ */
 export interface IValue<T> extends api.IValue<T> {
     /**
      * change the result state
