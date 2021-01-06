@@ -48,6 +48,4 @@ export * from "./array/IArray"
 export * from "./array/createArray"
 export * from "./stream/streamifyDictionary"
 
-export * from "./http/makeNativeHTTPrequest"
-
 export { wrap } from "./wrap"
