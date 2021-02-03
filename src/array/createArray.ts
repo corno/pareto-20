@@ -1,7 +1,7 @@
 
 import * as api from "pareto-api"
 import { IStream } from "../stream/IStream"
-import { value, createSafeValue } from "../value/createSafeValue"
+import { value, createValue } from "../value/createSafeValue"
 import { wrap } from "../wrap"
 import { createStream } from "../stream/createStream"
 import { IArray } from "./IArray"
@@ -123,7 +123,7 @@ class MyArray<ElementType> implements IArray<ElementType> {
                 })
             }
         }
-        return createSafeValue<ResultType[]>(execute)
+        return createValue<ResultType[]>(execute)
     }
     public mergeUnsafeValues<ResultType, ErrorType>(
         callback: (element: ElementType) => IUnsafeValue<ResultType, ErrorType>,

@@ -91,12 +91,12 @@ class Value<T> implements IValue<T> {
     }
 }
 
-export function createSafeValue<Type>(callerFunction: SafeCallerFunction<Type>): IValue<Type> {
+export function createValue<Type>(callerFunction: SafeCallerFunction<Type>): IValue<Type> {
     return new Value(callerFunction)
 }
 
 export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType>): IValue<ResultType> {
-    return createSafeValue(func)
+    return createValue(func)
 }
 
 /**
@@ -104,7 +104,7 @@ export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType
  * @deprecated use 'value()' instead
  */
 export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
-    return createSafeValue(onResult => {
+    return createValue(onResult => {
         new Promise<void>(resolve => {
             resolve()
         }).then(() => {

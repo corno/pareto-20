@@ -1,5 +1,5 @@
 import * as api from "pareto-api"
-import { createSafeValue } from "../value/createSafeValue"
+import { createValue } from "../value/createSafeValue"
 import { createUnsafeValue } from "../value/createUnsafeValue"
 import { createKeyValueStream } from "../stream/createKeyValueStream"
 import { streamifyDictionary } from "../stream/streamifyDictionary"
@@ -81,7 +81,7 @@ export class BaseDictionary<StoredData> {
         initialValue: ResultType,
         callback: (previousValue: ResultType, entry: StoredData, entryName: string) => api.IValue<ResultType>,
     ): api.IValue<ResultType> {
-        return createSafeValue<ResultType>(onResult => {
+        return createValue<ResultType>(onResult => {
             const keys = Object.keys(this.implementation)
             let currentValue = initialValue
             let currentIndex = 0

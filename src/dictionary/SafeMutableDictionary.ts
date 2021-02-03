@@ -2,7 +2,7 @@
     "max-classes-per-file": off
 */
 import * as api from "pareto-api"
-import { createSafeValue } from "../value/createSafeValue"
+import { createValue } from "../value/createSafeValue"
 import { error, success, wrapUnsafePromise } from "../value/createUnsafeValue"
 import { IStream } from "../stream/IStream"
 import { createArray } from "../array/createArray"
@@ -64,7 +64,7 @@ export class IntSafeMutableDictionary<StoredData, CreateData, OpenData> extends 
     }
     public getKeys(
     ): api.IValue<IStream<string, null>> {
-        return createSafeValue(onResult => {
+        return createValue(onResult => {
             //FIXME this shouldn't be a promise
             onResult(createArray(Object.keys(this.implementation)).streamify())
         })

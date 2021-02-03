@@ -4,7 +4,7 @@
 
 import * as p20 from "../../src"
 
-const val = p20.createSafeValue<number>(() => {
+const val = p20.createValue<number>(() => {
     console.log("initial value set")
     return 42
 })

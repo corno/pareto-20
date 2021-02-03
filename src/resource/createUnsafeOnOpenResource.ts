@@ -1,6 +1,6 @@
 import * as api from "pareto-api"
 import { IValue, SafeCallerFunction } from "../value/ISafeValue"
-import { createSafeValue } from "../value/createSafeValue"
+import { createValue } from "../value/createSafeValue"
 import { IUnsafeOnOpenResource } from "./IUnsafeOnOpenResource"
 import { ISafeOpenedResource } from "./ISafeOpenedResource"
 import { createSafeOpenedResource } from "./createSafeOpenedResource"
@@ -37,7 +37,7 @@ class UnsafeOnOpenResource<ResourceType, OpenError> implements IUnsafeOnOpenReso
                 }
             )
         }
-        return createSafeValue<ResultType>(newFunc)
+        return createValue<ResultType>(newFunc)
     }
     public mapOpenError<NewErrorType>(errorConverter: (openError: OpenError) => api.IValue<NewErrorType>): IUnsafeOnOpenResource<ResourceType, NewErrorType> {
         return new UnsafeOnOpenResource<ResourceType, NewErrorType>((onOpenError, onSuccess) => {

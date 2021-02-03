@@ -1,6 +1,7 @@
 import * as api from "pareto-api"
+import { IValue } from "pareto-api"
 import { IUnsafeValue } from "../value/IUnsafeValue"
-import { IStreamConsumer } from "./IStreamConsumer"
+import { IStreamConsumer, IUnsafeStreamConsumer } from "./IStreamConsumer"
 
 export type FilterResult<DataType> = [false] | [true, DataType]
 
@@ -12,14 +13,23 @@ export interface IStream<DataType, EndDataType> //eslint-disable-line
     // ): api.IUnsafeValue<DataType[], null>
 
     /**
+     * trying to consuming a stream transforms the stream into an IUnsafeValue.
+     * @param limiter
+     * @param consumer
+     */
+    tryToConsume<ResultType, ErrorType>(
+        limiter: api.StreamLimiter,
+        consumer: IUnsafeStreamConsumer<DataType, EndDataType, ResultType, ErrorType>
+    ): IUnsafeValue<ResultType, ErrorType>
+    /**
      * consuming a stream transforms the stream into an IUnsafeValue.
      * @param limiter
      * @param consumer
      */
-    consume<ResultType, ErrorType>(
+    consume<ResultType>(
         limiter: api.StreamLimiter,
-        consumer: IStreamConsumer<DataType, EndDataType, ResultType, ErrorType>
-    ): IUnsafeValue<ResultType, ErrorType>
+        consumer: IStreamConsumer<DataType, EndDataType, ResultType>
+    ): IValue<ResultType>
     map<NewDataType>(
         onData: (data: DataType) => api.IValue<NewDataType>
     ): IStream<NewDataType, EndDataType>

@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
 import { IStream } from "./IStream"
 import { wrap } from "../wrap"
-import { result } from "../value/createSafeValue"
+import { createValue, value } from "../value/createSafeValue"
 import { success, error, createUnsafeValue } from "../value/createUnsafeValue"
 import { IUnsafeValue } from "../value/IUnsafeValue"
 //import { IUnsafeValue } from "../values/IUnsafeValue"
@@ -42,7 +42,7 @@ class Stream<DataType, EndDataType>
     //     })
     // }
 
-    consume<ResultType, ErrorType>(
+    tryToConsume<ResultType, ErrorType>(
         limiter: api.StreamLimiter,
         consumer: {
             onData: (data: DataType) => api.IValue<boolean>
@@ -71,10 +71,37 @@ class Stream<DataType, EndDataType>
             )
         })
     }
+
+    consume<ResultType>(
+        limiter: api.StreamLimiter,
+        consumer: {
+            onData: (data: DataType) => api.IValue<boolean>
+            onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>
+        },
+    ): api.IValue<ResultType> {
+        return createValue(onResult => {
+
+            this.handle(
+                limiter,
+                {
+                    onData: data => {
+                        return consumer.onData(data)
+                    },
+                    onEnd: (aborted, endData) => {
+                        return consumer.onEnd(aborted, endData).handle(
+                            theResult => {
+                                onResult(theResult)
+                            }
+                        )
+                    },
+                }
+            )
+        })
+    }
     public map<NewDataType>(convert: (data: DataType) => api.IValue<NewDataType>): IStream<NewDataType, EndDataType> {
         return new Stream<NewDataType, EndDataType>((newLimiter, newConsumer) => {
             let endDataX: EndDataType
-            return this.consume(
+            return this.tryToConsume(
                 newLimiter,
                 {
                     onData: data => {
@@ -84,7 +111,7 @@ class Stream<DataType, EndDataType>
                     },
                     onEnd: (_aborted, endData) => {
                         endDataX = endData
-                        return result(null)
+                        return value(null)
                     },
                 }
             ).rework(

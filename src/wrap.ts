@@ -2,7 +2,7 @@ import * as api from "pareto-api"
 
 import { IValue } from "./value/ISafeValue"
 import { IUnsafeValue } from "./value/IUnsafeValue"
-import { createSafeValue } from "./value/createSafeValue"
+import { createValue } from "./value/createSafeValue"
 import { createUnsafeValue } from "./value/createUnsafeValue"
 
 import { IKeyValueStream } from "./stream/IKeyValueStream"
@@ -53,7 +53,7 @@ export const wrap = {
         }
     },
     Value: <SourceResultType>(promise: api.IValue<SourceResultType>): IValue<SourceResultType> => {
-        return createSafeValue<SourceResultType>(onResult => {
+        return createValue<SourceResultType>(onResult => {
             promise.handle(onResult)
         })
     },

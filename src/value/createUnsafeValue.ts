@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
 import { IValue } from "./ISafeValue"
 import { IUnsafeValue } from "./IUnsafeValue"
-import { result, createSafeValue } from "./createSafeValue"
+import { result, createValue } from "./createSafeValue"
 
 class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, ErrorType> {
     private isCalled: boolean
@@ -185,7 +185,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onError if the promise results in an error, this handler is called.
      */
     public catch(onError: (error2: ErrorType) => IValue<ResultType>): IValue<ResultType> {
-        return createSafeValue<ResultType>(onResult => {
+        return createValue<ResultType>(onResult => {
             this.handle(
                 err => {
                     onError(err).handle(res => onResult(res))
@@ -207,7 +207,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
         onError: (error2: ErrorType) => api.IValue<NewResultType>,
         onSuccess: (result2: ResultType) => api.IValue<NewResultType>
     ): IValue<NewResultType> {
-        return createSafeValue<NewResultType>(onResult => {
+        return createValue<NewResultType>(onResult => {
             this.handle(
                 err => {
                     onError(err).handle(res => onResult(res))
