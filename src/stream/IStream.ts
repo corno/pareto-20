@@ -1,6 +1,6 @@
 import * as api from "pareto-api"
-import { IValue } from "pareto-api"
 import { IUnsafeValue } from "../value/IUnsafeValue"
+import { IValue } from "../value/ISafeValue"
 import { IStreamConsumer, IUnsafeStreamConsumer } from "./IStreamConsumer"
 
 export type FilterResult<DataType> = [false] | [true, DataType]

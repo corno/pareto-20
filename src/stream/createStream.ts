@@ -4,6 +4,7 @@ import { wrap } from "../wrap"
 import { createValue, value } from "../value/createSafeValue"
 import { success, error, createUnsafeValue } from "../value/createUnsafeValue"
 import { IUnsafeValue } from "../value/IUnsafeValue"
+import { IValue } from "../value/ISafeValue"
 //import { IUnsafeValue } from "../values/IUnsafeValue"
 
 // export type HandleStreamFunction<Data, EndData> = (
@@ -78,7 +79,7 @@ class Stream<DataType, EndDataType>
             onData: (data: DataType) => api.IValue<boolean>
             onEnd: (aborted: boolean, endData: EndDataType) => api.IValue<ResultType>
         },
-    ): api.IValue<ResultType> {
+    ): IValue<ResultType> {
         return createValue(onResult => {
 
             this.handle(
