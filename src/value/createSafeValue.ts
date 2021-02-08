@@ -101,9 +101,8 @@ export function wrapSafeFunction<ResultType>(func: SafeCallerFunction<ResultType
 
 /**
  * use this if a (safe) Value is required, but the result is already known
- * @deprecated use 'value()' instead
  */
-export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
+export const value = <ResultType>(res: ResultType): IValue<ResultType> => {
     return createValue(onResult => {
         new Promise<void>(resolve => {
             resolve()
@@ -120,9 +119,3 @@ export const result = <ResultType>(res: ResultType): IValue<ResultType> => {
         })
     })
 }
-
-
-/**
- * use this if a (safe) Value is required, but the result is already known
- */
-export const value = result

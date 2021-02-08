@@ -9,11 +9,11 @@ const val = p20.createValue<number>(() => {
     return 42
 })
 
-//const val = p20.result(42)
+//const val = p20.value(42)
 
 const val2 = val.mapResult<string>(result => {
     console.log(`the value was ${result}`)
-    return p20.result("fourty-two")
+    return p20.value("fourty-two")
 })
 
 const val3 = val2.try<number, string>(result => {

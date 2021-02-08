@@ -1,6 +1,6 @@
 import * as chai from "chai"
 import * as sa from "../../src/array/createArray"
-import { wrapSafeFunction, result, success, wrap } from "../../src"
+import { wrapSafeFunction, value, success, wrap } from "../../src"
 
 
 describe("stringfyArray", () => {
@@ -44,7 +44,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
                 //console.log(data)
                 out.push(data)
                 if (data === abortOn) {
-                    return result(true)
+                    return value(true)
                 }
                 if (timeout !== null) {
                     return wrapSafeFunction<boolean>(onResult => {
@@ -73,7 +73,7 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
                         }
                     })
                 } else {
-                    return result(false)
+                    return value(false)
                 }
             },
             onEnd: aborted => {
@@ -87,11 +87,11 @@ function testStreamifiedArray(timeout: null | number, theArray: number[], abortO
     )).reworkAndCatch(
         () => {
             chai.assert.deepEqual(out, expected)
-            return result(null)
+            return value(null)
         },
         () => {
             chai.assert.deepEqual(out, expected)
-            return result(null)
+            return value(null)
         }
     ).convertToNativePromise()
 }

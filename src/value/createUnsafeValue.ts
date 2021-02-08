@@ -1,7 +1,7 @@
 import * as api from "pareto-api"
 import { IValue } from "./ISafeValue"
 import { IUnsafeValue } from "./IUnsafeValue"
-import { result, createValue } from "./createSafeValue"
+import { value, createValue } from "./createSafeValue"
 
 class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, ErrorType> {
     private isCalled: boolean
@@ -69,7 +69,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
     public mapResultRaw<NewResultType>(
         onSuccess: (result2: ResultType) => NewResultType
     ): UnsafeValue<NewResultType, ErrorType> {
-        return this.mapResult(data => result(onSuccess(data)))
+        return this.mapResult(data => value(onSuccess(data)))
     }
     /**
      * change the error state
@@ -99,7 +99,7 @@ class UnsafeValue<ResultType, ErrorType> implements IUnsafeValue<ResultType, Err
      * @param onError
      */
     public mapErrorRaw<NewErrorType>(onError: (error2: ErrorType) => NewErrorType): UnsafeValue<ResultType, NewErrorType> {
-        return this.mapError(err => result(onError(err)))
+        return this.mapError(err => value(onError(err)))
     }
     /**
      * try to convert the success state into a new success state
