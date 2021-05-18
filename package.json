@@ -1,6 +1,6 @@
 {
   "name": "pareto-20",
-  "version": "0.25.2",
+  "version": "0.25.3",
   "description": "utils for the very specific 20% of the code",
   "main": "dist/src/index.js",
   "scripts": {
